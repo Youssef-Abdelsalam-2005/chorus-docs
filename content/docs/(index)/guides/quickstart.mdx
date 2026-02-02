@@ -1,0 +1,288 @@
+---
+title: Quick Start
+description: Get started with Kejue in under 5 minutes
+icon: Zap
+---
+
+## Create Your First Agent
+
+Welcome to Chorus! This guide will help you create your first AI agent and make a test call in just a few minutes.
+
+## Prerequisites
+
+Before you begin, you'll need:
+
+1. A Chorus account ([sign up here](https://app.chorus-ai.co))
+2. An API key (generate one in your dashboard under Settings > API Keys)
+
+## Step 1: Create an Agent
+
+Create your first agent using the API:
+
+```bash
+curl -X POST https://api.chorus-ai.co/v1/agents \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My First Agent",
+    "systemPrompt": "You are a friendly AI assistant. Greet the user warmly and ask how you can help them today.",
+    "isActive": true,
+    "allowEndCall": true,
+    "firstSpeaker": "agent",
+    "agentGreeting": "Hello! This is your AI assistant calling. How can I help you today?",
+    "agentGreetingEnabled": true
+  }'
+```
+
+Save the `id` from the response - you'll need it for making calls.
+
+## Step 2: Add a Phone Number
+
+If you want to make real calls, add a phone number. For Twilio:
+
+```bash
+curl -X POST https://api.chorus-ai.co/v1/phone-numbers \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Twilio Number",
+    "number": "+15551234567",
+    "provider": "twilio",
+    "agentId": "YOUR_AGENT_ID",
+    "twilioAccountSid": "ACxxxxxxxxxxxxx",
+    "twilioAuthToken": "your-auth-token"
+  }'
+```
+
+Make an actual phone call:
+
+```bash
+curl -X POST https://api.chorus-ai.co/api/calls/outbound \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "x-organization-id: YOUR_ORG_ID" \
+  -d '{
+    "agentId": "YOUR_AGENT_ID",
+    "phoneNumberId": "YOUR_PHONE_NUMBER_ID",
+    "to": "+15559876543"
+  }'
+```
+
+Your agent will call the specified number!
+
+## Step 3: Check Call Details
+
+After the call completes, retrieve the details:
+
+```bash
+curl https://api.chorus-ai.co/v1/calls/CALL_ID \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+You'll see:
+- Call duration
+- Transcript
+- Recording URL
+- Call status
+
+## What's Next?
+
+### Customize Your Agent
+
+Make your agent more sophisticated:
+
+```json
+{
+  "systemPrompt": "You are a customer support agent for Acme Inc. Your goal is to help customers with their questions about our products and services. Be friendly, professional, and concise.\n\nKey Information:\n- Business hours: Mon-Fri 9AM-5PM EST\n- Return policy: 30 days with receipt\n- Support email: support@acme.com\n\nAlways:\n1. Greet the customer warmly\n2. Ask clarifying questions\n3. Provide clear, accurate information\n4. Offer to help with anything else\n5. Thank them for calling",
+  "allowEndCall": true,
+  "maxCallDurationSeconds": 600
+}
+```
+
+### Add Custom Tools
+
+Give your agent superpowers by connecting it to your APIs:
+
+```json
+{
+  "name": "check_order_status",
+  "description": "Check the status of a customer's order using their order ID",
+  "type": "http",
+  "config": {
+    "url": "https://api.your-company.com/orders/status",
+    "method": "POST",
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer YOUR_API_KEY"
+      }
+    ],
+    "body": [
+      {
+        "name": "order_id",
+        "type": "string",
+        "description": "The customer's order ID",
+        "required": true
+      }
+    ]
+  }
+}
+```
+
+Learn more in the [Tools documentation](/docs/core-concepts/tools).
+
+### Use Context Variables
+
+Personalize conversations with dynamic data:
+
+```bash
+curl -X POST https://api.chorus-ai.co/api/calls/outbound \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "x-organization-id: YOUR_ORG_ID" \
+  -d '{
+    "agentId": "YOUR_AGENT_ID",
+    "phoneNumberId": "YOUR_PHONE_NUMBER_ID",
+    "to": "+15559876543",
+    "contextVariables": {
+      "customer_name": "Jane Smith",
+      "order_id": "12345",
+      "order_status": "Shipped",
+      "tracking_number": "1Z999AA1234567890"
+    }
+  }'
+```
+
+Update your system prompt to use these variables:
+
+```
+You are calling {{customer_name}} about order #{{order_id}}.
+
+Order Status: {{order_status}}
+Tracking: {{tracking_number}}
+
+Ask if they have any questions about their delivery.
+```
+
+Learn more in the [Context Variables guide](/docs/guides/context-variables).
+
+### Set Up Webhooks
+
+Get notified when calls complete:
+
+```json
+{
+  "postCallWebhookUrl": "https://your-app.com/webhooks/call-completed",
+  "postCallWebhookSecret": "your-secret-key"
+}
+```
+
+You'll receive a POST request with:
+- Call transcript
+- Duration and status
+- Recording URL
+- Extracted data
+
+Learn more in the [Webhooks guide](/docs/guides/webhooks).
+
+### Extract Structured Data
+
+Configure your agent to extract specific information:
+
+```json
+{
+  "postCallExtractionSchema": [
+    {
+      "name": "customer_satisfied",
+      "description": "Was the customer satisfied with the resolution?",
+      "type": "boolean"
+    },
+    {
+      "name": "issue_type",
+      "description": "What type of issue did the customer have?",
+      "type": "string"
+    },
+    {
+      "name": "follow_up_needed",
+      "description": "Does this require a follow-up?",
+      "type": "boolean"
+    }
+  ]
+}
+```
+
+The extracted data appears in call details and webhook payloads.
+
+## Common Use Cases
+
+### Customer Support
+
+```json
+{
+  "name": "Support Agent",
+  "systemPrompt": "You are a helpful customer support agent. Listen to customer issues, provide solutions, and create tickets for complex problems.",
+  "tools": ["create_ticket", "search_kb", "check_account_status"]
+}
+```
+
+### Appointment Scheduling
+
+```json
+{
+  "name": "Scheduler Agent",
+  "systemPrompt": "You help customers schedule appointments. Check availability, book time slots, and send confirmations.",
+  "tools": ["check_availability", "book_appointment", "send_confirmation"]
+}
+```
+
+### Lead Qualification
+
+```json
+{
+  "name": "Sales Qualifier",
+  "systemPrompt": "You qualify leads by asking about their needs, budget, timeline, and decision-making process. Be consultative, not pushy.",
+  "postCallExtractionSchema": [
+    {"name": "budget", "type": "string"},
+    {"name": "timeline", "type": "string"},
+    {"name": "qualified", "type": "boolean"}
+  ]
+}
+```
+
+### Order Follow-ups
+
+```json
+{
+  "name": "Order Follow-up Agent",
+  "systemPrompt": "You are calling about order #{{order_id}}. Ask if everything arrived okay and if they have any questions.",
+  "contextVariables": {
+    "order_id": "12345",
+    "customer_name": "John Doe"
+  }
+}
+```
+
+## Resources
+
+- **[API Reference](/docs/api-reference)** - Complete API documentation
+- **[Agents](/docs/core-concepts/agents)** - Deep dive into agent configuration
+- **[Tools](/docs/core-concepts/tools)** - Connect external APIs
+- **[Webhooks](/docs/guides/webhooks)** - Real-time notifications
+- **[Context Variables](/docs/guides/context-variables)** - Dynamic data injection
+
+## Need Help?
+
+- **Documentation**: [docs.chorus-ai.co](https://docs.chorus-ai.co)
+- **Support**: youssef@kejue.co
+- **Dashboard**: [app.chorus-ai.co](https://app.chorus-ai.co)
+
+## Next Steps
+
+Now that you've made your first call, explore:
+
+1. **[Create custom tools](/docs/core-concepts/tools)** to connect your systems
+2. **[Configure webhooks](/docs/guides/webhooks)** for real-time updates
+3. **[Use context variables](/docs/guides/context-variables)** to personalize calls
+4. **[Set up inbound calls](/docs/core-concepts/phone-numbers)** to handle incoming calls
+
+Happy building! 🚀

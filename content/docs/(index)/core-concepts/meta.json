@@ -1,0 +1,11 @@
+{
+  "title": "Core Concepts",
+  "$schema": "../../../../.source/json-schema/docs.meta.json",
+  "icon": "BookOpen",
+  "pages": [
+    "agents",
+    "phone-numbers",
+    "tools",
+    "calls"
+  ]
+}

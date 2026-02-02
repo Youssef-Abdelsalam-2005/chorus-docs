@@ -1,0 +1,458 @@
+---
+title: Context Variables
+description: Use template variables to personalize agent conversations with dynamic data
+icon: Variable
+---
+
+## Introduction
+
+Context variables allow you to inject dynamic, call-specific data into your agent's system prompt and greeting. This enables highly personalized conversations where agents can reference customer names, order details, account information, and more.
+
+## How Context Variables Work
+
+When making a call, you pass `contextVariables` as an object. These variables are then replaced in your agent's:
+
+- **System Prompt**: Gives the agent context about the conversation
+- **Agent Greeting**: Personalizes the opening message
+
+## Basic Example
+
+### Agent Configuration
+
+System prompt with variables:
+
+```
+You are calling {{customer_name}} about their order #{{order_id}}.
+
+Order Details:
+- Product: {{product_name}}
+- Order Date: {{order_date}}
+- Status: {{order_status}}
+
+Ask if they have any questions about their order.
+```
+
+Greeting with variables:
+
+```
+Hi {{customer_name}}, this is calling from Acme Inc. about your recent order. Do you have a moment to chat?
+```
+
+### Making the Call
+
+```json
+POST /api/calls/outbound
+{
+  "agentId": "agent-uuid",
+  "phoneNumberId": "phone-uuid",
+  "to": "+15551234567",
+  "contextVariables": {
+    "customer_name": "Jane Smith",
+    "order_id": "12345",
+    "product_name": "Premium Widget",
+    "order_date": "January 15, 2024",
+    "order_status": "Shipped - arriving tomorrow"
+  }
+}
+```
+
+### What the Agent Sees
+
+The system prompt becomes:
+
+```
+You are calling Jane Smith about their order #12345.
+
+Order Details:
+- Product: Premium Widget
+- Order Date: January 15, 2024
+- Status: Shipped - arriving tomorrow
+
+Ask if they have any questions about their order.
+```
+
+The greeting becomes:
+
+```
+Hi Jane Smith, this is calling from Acme Inc. about your recent order. Do you have a moment to chat?
+```
+
+## Variable Syntax
+
+Use double curly braces to define variables:
+
+```
+{{variable_name}}
+```
+
+Variable names:
+- Can contain letters, numbers, and underscores
+- Are case-sensitive
+- Should use snake_case by convention
+
+## Supported Data Types
+
+Context variables support:
+- **Strings**: `"John Doe"`, `"Premium Plan"`
+- **Numbers**: `42`, `99.99`
+- **Booleans**: `true`, `false`
+
+```json
+{
+  "contextVariables": {
+    "customer_name": "John Doe",
+    "account_age_days": 365,
+    "is_premium_member": true,
+    "account_balance": 1250.50
+  }
+}
+```
+
+## Real-World Examples
+
+### Customer Support Follow-up
+
+System prompt:
+
+```
+You are following up with {{customer_name}} about support ticket #{{ticket_id}}.
+
+Ticket Details:
+- Issue: {{issue_summary}}
+- Priority: {{priority}}
+- Created: {{created_date}}
+- Last Update: {{last_update}}
+
+Check if the issue has been resolved and if they need any additional help.
+```
+
+Call:
+
+```json
+{
+  "contextVariables": {
+    "customer_name": "John Doe",
+    "ticket_id": "SUPP-1234",
+    "issue_summary": "Cannot access account dashboard",
+    "priority": "High",
+    "created_date": "January 10, 2024",
+    "last_update": "Fixed - credentials reset"
+  }
+}
+```
+
+### Appointment Reminder
+
+System prompt:
+
+```
+You are reminding {{patient_name}} about their upcoming appointment.
+
+Appointment Details:
+- Date: {{appointment_date}}
+- Time: {{appointment_time}}
+- Location: {{office_location}}
+- Provider: Dr. {{provider_name}}
+- Type: {{appointment_type}}
+
+Confirm they can still make it and offer to reschedule if needed.
+```
+
+Call:
+
+```json
+{
+  "contextVariables": {
+    "patient_name": "Sarah Johnson",
+    "appointment_date": "Tomorrow, January 20th",
+    "appointment_time": "2:30 PM",
+    "office_location": "Downtown Medical Center, Suite 400",
+    "provider_name": "Smith",
+    "appointment_type": "Annual Checkup"
+  }
+}
+```
+
+### Lead Qualification
+
+System prompt:
+
+```
+You are calling {{lead_name}} from {{company_name}}.
+
+Lead Information:
+- Industry: {{industry}}
+- Company Size: {{company_size}}
+- Source: {{lead_source}}
+- Interest: {{interest_area}}
+
+Your goal is to understand their needs and qualify them for our {{product_name}} solution.
+```
+
+Call:
+
+```json
+{
+  "contextVariables": {
+    "lead_name": "Michael Chen",
+    "company_name": "TechCorp Solutions",
+    "industry": "SaaS",
+    "company_size": "50-100 employees",
+    "lead_source": "Website Demo Request",
+    "interest_area": "API Integration",
+    "product_name": "Enterprise Platform"
+  }
+}
+```
+
+### Order Status Update
+
+System prompt:
+
+```
+You are calling {{customer_name}} about order #{{order_id}}.
+
+Shipping Information:
+- Carrier: {{carrier}}
+- Tracking: {{tracking_number}}
+- Current Status: {{shipping_status}}
+- Estimated Delivery: {{delivery_date}}
+- Delivery Address: {{delivery_address}}
+
+Inform them of the shipping status and tracking information. Ask if they have any questions.
+```
+
+Call:
+
+```json
+{
+  "contextVariables": {
+    "customer_name": "Emily Rodriguez",
+    "order_id": "ORD-789456",
+    "carrier": "FedEx",
+    "tracking_number": "1Z999AA1234567890",
+    "shipping_status": "Out for delivery",
+    "delivery_date": "Today by 5:00 PM",
+    "delivery_address": "123 Main St, Apt 4B"
+  }
+}
+```
+
+### Payment Reminder
+
+System prompt:
+
+```
+You are calling {{customer_name}} about their account with {{business_name}}.
+
+Account Status:
+- Account Number: {{account_number}}
+- Outstanding Balance: ${{balance}}
+- Due Date: {{due_date}}
+- Days Overdue: {{days_overdue}}
+
+Be polite and professional. Remind them of the outstanding balance and offer payment options.
+```
+
+Call:
+
+```json
+{
+  "contextVariables": {
+    "customer_name": "Robert Williams",
+    "business_name": "Acme Services",
+    "account_number": "ACC-456789",
+    "balance": "249.99",
+    "due_date": "January 1, 2024",
+    "days_overdue": "14"
+  }
+}
+```
+
+## Best Practices
+
+### 1. Keep Variable Names Descriptive
+
+**Good:**
+```json
+{
+  "customer_name": "Jane Smith",
+  "order_id": "12345",
+  "delivery_date": "Tomorrow"
+}
+```
+
+**Avoid:**
+```json
+{
+  "n": "Jane Smith",
+  "o": "12345",
+  "d": "Tomorrow"
+}
+```
+
+### 2. Use Consistent Naming
+
+Pick a convention and stick to it:
+- ✅ `customer_name`, `order_id`, `shipping_status` (snake_case)
+- ❌ `customerName`, `order_id`, `ShippingStatus` (mixed)
+
+### 3. Format Data Appropriately
+
+Make data human-readable:
+
+**Good:**
+```json
+{
+  "order_date": "January 15, 2024",
+  "total_amount": "$149.99",
+  "delivery_window": "Tomorrow between 2-4 PM"
+}
+```
+
+**Avoid:**
+```json
+{
+  "order_date": "2024-01-15T00:00:00Z",
+  "total_amount": 14999,
+  "delivery_window": "1400-1600"
+}
+```
+
+### 4. Provide Complete Context
+
+Include all information the agent might need:
+
+```json
+{
+  "customer_name": "John Doe",
+  "account_type": "Premium",
+  "account_age": "2 years",
+  "last_interaction": "December 2023 - Billing inquiry",
+  "preferred_contact": "Email",
+  "timezone": "EST"
+}
+```
+
+## Advanced Patterns
+
+### Conditional Logic
+
+While context variables don't support conditionals directly, you can prepare conditional text in your application:
+
+```javascript
+const contextVariables = {
+  customer_name: "Jane Smith",
+  greeting_suffix: customer.isPremium 
+    ? "as one of our valued premium members"
+    : "",
+  special_offer: customer.isPremium
+    ? "20% discount on your next purchase"
+    : "10% discount for first-time buyers"
+};
+```
+
+System prompt:
+
+```
+You are calling {{customer_name}} {{greeting_suffix}}.
+
+Special Offer: {{special_offer}}
+```
+
+### Multi-Line Data
+
+For complex information, format it as a single string:
+
+```json
+{
+  "order_items": "1. Premium Widget ($99)\n2. Standard Gadget ($49)\n3. Deluxe Tool ($79)",
+  "shipping_timeline": "- Order Placed: Jan 15\n- Shipped: Jan 16\n- Expected Delivery: Jan 18"
+}
+```
+
+### Dynamic Lists
+
+Prepare formatted lists in your app:
+
+```javascript
+const items = [
+  { name: "Widget", price: 99 },
+  { name: "Gadget", price: 49 }
+];
+
+const contextVariables = {
+  order_items: items.map(item => 
+    `- ${item.name}: $${item.price}`
+  ).join('\n'),
+  item_count: items.length,
+  total: items.reduce((sum, item) => sum + item.price, 0)
+};
+```
+
+### Debugging
+
+If variables aren't working:
+
+1. **Check Syntax**: Ensure you're using `{{variable_name}}`
+2. **Case Sensitive**: Variable names must match exactly
+3. **Verify JSON**: Ensure your JSON is valid
+4. **View Call Logs**: Check processed prompts in call details
+
+## Combining with Tools
+
+Context variables can inform tool calls. For example:
+
+System prompt:
+
+```
+You are calling {{customer_name}} about order #{{order_id}}.
+
+If they ask about order status, use the check_order_status tool with order ID {{order_id}}.
+```
+
+The agent will automatically use the correct order ID when calling the tool.
+
+## Security Considerations
+
+### Never Include Sensitive Data
+
+**Don't pass:**
+- Full credit card numbers
+- Passwords or PINs
+- Social Security Numbers
+- Unencrypted PII
+
+**Safe to pass:**
+- Names and contact info
+- Order IDs and reference numbers
+- Public product information
+- Delivery addresses
+
+### Audit Logs
+
+Context variables are stored with call records. Be mindful of:
+- Compliance requirements (GDPR, CCPA)
+- Data retention policies
+- Access controls
+
+
+Example:
+
+```json
+{
+  "agentId": "agent-uuid",
+  "phoneNumberId": "phone-uuid",
+  "to": "+15551234567",
+  "contextVariables": {
+    "key": "value"
+  }
+}
+```
+
+## Next Steps
+
+- Learn about [Agents](/docs/core-concepts/agents) to configure prompts and greetings
+- Explore [Tools](/docs/core-concepts/tools) to fetch dynamic data during calls
+- Set up [Webhooks](/docs/guides/webhooks) to capture extracted data
+- Read the [Calls documentation](/docs/core-concepts/calls) for more examples

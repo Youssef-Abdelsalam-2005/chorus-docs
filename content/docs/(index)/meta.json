@@ -1,0 +1,14 @@
+{
+  "title": "Documentation",
+  "description": "Get started with Kejue API",
+  "icon": "Book",
+  "root": true,
+  "pages": [
+    "---Getting Started---",
+    "index",
+    "---Core Concepts---",
+    "...core-concepts",
+    "---Guides---",
+    "...guides"
+  ]
+}

@@ -1,0 +1,448 @@
+---
+title: Tools
+description: Create custom HTTP tools that agents can call during conversations
+icon: Code
+---
+
+## Introduction
+
+Tools extend your agents' capabilities by allowing them to call external HTTP APIs during conversations. Agents can fetch data, trigger actions, and integrate with your existing systems - all in real-time during phone calls.
+
+## What are Tools?
+
+A **Tool** is a configured HTTP endpoint that your agent can call when it needs to:
+
+- Look up customer information
+- Check order status or inventory
+- Schedule appointments
+- Create support tickets
+- Fetch personalized recommendations
+- Trigger workflows in your systems
+
+The agent autonomously decides when to call tools based on the conversation context and the tool's description.
+
+## Tool Structure
+
+Each tool consists of:
+
+- **Name**: A unique identifier (e.g., `get_customer_info`)
+- **Description**: Tells the agent what the tool does and when to use it
+- **HTTP Configuration**: URL, method, headers, timeout
+- **Parameters**: Input fields the agent should provide
+
+## Creating a Tool
+
+### Basic Example
+
+```json
+{
+  "name": "get_customer_info",
+  "description": "Fetches customer details from CRM using their phone number",
+  "type": "http",
+  "config": {
+    "url": "https://api.your-crm.com/customers/lookup",
+    "method": "POST",
+    "timeout": 5000,
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer your-api-key"
+      },
+      {
+        "key": "Content-Type",
+        "value": "application/json"
+      }
+    ],
+    "body": [
+      {
+        "name": "phone_number",
+        "type": "string",
+        "description": "Customer's phone number",
+        "required": true
+      }
+    ]
+  }
+}
+```
+
+### Tool Configuration
+
+#### URL and Method
+
+```json
+{
+  "url": "https://api.example.com/endpoint",
+  "method": "POST"  // GET, POST, PUT, PATCH, DELETE
+}
+```
+
+#### Timeout
+
+Set request timeout in milliseconds (default: 5000ms):
+
+```json
+{
+  "timeout": 3000  // 3 seconds
+}
+```
+
+<Callout type="warning">
+Keep timeouts short (< 5 seconds) to avoid awkward pauses during conversations. The agent will wait for the tool response before continuing.
+</Callout>
+
+#### Headers
+
+Add custom headers for authentication and configuration:
+
+```json
+{
+  "headers": [
+    {
+      "key": "Authorization",
+      "value": "Bearer YOUR_API_KEY"
+    },
+    {
+      "key": "X-Custom-Header",
+      "value": "custom-value"
+    }
+  ]
+}
+```
+
+#### Body Parameters
+
+Define the data structure the agent should send:
+
+```json
+{
+  "body": [
+    {
+      "name": "customer_id",
+      "type": "string",
+      "description": "The unique customer identifier",
+      "required": true
+    },
+    {
+      "name": "include_history",
+      "type": "boolean",
+      "description": "Whether to include purchase history",
+      "required": false
+    },
+    {
+      "name": "limit",
+      "type": "number",
+      "description": "Maximum number of records to return",
+      "required": false
+    }
+  ]
+}
+```
+
+Supported types:
+- `string`
+- `number`
+- `boolean`
+
+## Writing Effective Descriptions
+
+The tool description is crucial - it tells the agent when and how to use the tool.
+
+### Good Description
+
+```
+Fetches customer information from the CRM including their name, email, 
+purchase history, and account status. Use this when you need to:
+- Look up customer details
+- Verify customer identity
+- Check account status or tier
+- Review past purchases or interactions
+```
+
+### Poor Description
+
+```
+Gets customer data
+```
+
+### Description Best Practices
+
+1. **Be Specific**: Explain exactly what the tool does
+2. **List Use Cases**: When should the agent call this tool?
+3. **Mention Returned Data**: What information does it provide?
+4. **Set Expectations**: Any limitations or requirements?
+
+## Real-World Examples
+
+### Customer Lookup
+
+```json
+{
+  "name": "lookup_customer",
+  "description": "Searches for customer by phone number or email. Returns customer name, account tier, last purchase date, and outstanding balance. Use this at the start of calls to personalize the conversation.",
+  "type": "http",
+  "config": {
+    "url": "https://api.acme.com/customers/search",
+    "method": "POST",
+    "timeout": 3000,
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer YOUR_CRM_API_KEY"
+      }
+    ],
+    "body": [
+      {
+        "name": "phone_number",
+        "type": "string",
+        "description": "Customer's phone number in E.164 format",
+        "required": false
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "description": "Customer's email address",
+        "required": false
+      }
+    ]
+  }
+}
+```
+
+### Check Order Status
+
+```json
+{
+  "name": "check_order_status",
+  "description": "Retrieves order status, tracking number, and estimated delivery date. Use when customer asks about their order or delivery. Requires order ID.",
+  "type": "http",
+  "config": {
+    "url": "https://api.acme.com/orders/status",
+    "method": "GET",
+    "timeout": 4000,
+    "headers": [
+      {
+        "key": "X-API-Key",
+        "value": "YOUR_ORDERS_API_KEY"
+      }
+    ],
+    "body": [
+      {
+        "name": "order_id",
+        "type": "string",
+        "description": "The order number provided by the customer",
+        "required": true
+      }
+    ]
+  }
+}
+```
+
+### Schedule Appointment
+
+```json
+{
+  "name": "schedule_appointment",
+  "description": "Books an appointment in the scheduling system. Returns confirmation number and appointment details. Use when customer wants to schedule a service, consultation, or callback.",
+  "type": "http",
+  "config": {
+    "url": "https://api.acme.com/appointments",
+    "method": "POST",
+    "timeout": 5000,
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer YOUR_CALENDAR_API_KEY"
+      }
+    ],
+    "body": [
+      {
+        "name": "customer_phone",
+        "type": "string",
+        "description": "Customer's phone number",
+        "required": true
+      },
+      {
+        "name": "preferred_date",
+        "type": "string",
+        "description": "Preferred date in ISO 8601 format",
+        "required": true
+      },
+      {
+        "name": "service_type",
+        "type": "string",
+        "description": "Type of service needed",
+        "required": true
+      }
+    ]
+  }
+}
+```
+
+### Create Support Ticket
+
+```json
+{
+  "name": "create_ticket",
+  "description": "Creates a support ticket in the helpdesk system. Use when customer reports an issue that requires follow-up or escalation. Returns ticket number.",
+  "type": "http",
+  "config": {
+    "url": "https://api.helpdesk.com/tickets",
+    "method": "POST",
+    "timeout": 5000,
+    "headers": [
+      {
+        "key": "Authorization",
+        "value": "Bearer YOUR_HELPDESK_KEY"
+      }
+    ],
+    "body": [
+      {
+        "name": "customer_email",
+        "type": "string",
+        "description": "Customer's email address",
+        "required": true
+      },
+      {
+        "name": "issue_summary",
+        "type": "string",
+        "description": "Brief description of the issue",
+        "required": true
+      },
+      {
+        "name": "priority",
+        "type": "string",
+        "description": "Ticket priority: low, medium, high, urgent",
+        "required": false
+      }
+    ]
+  }
+}
+```
+
+## Assigning Tools to Agents
+
+After creating tools, assign them to agents via the dashboard or API. An agent can have multiple tools assigned.
+
+The agent will decide which tools to call (if any) based on:
+- The conversation context
+- Tool descriptions
+- The agent's system prompt
+
+## How Agents Use Tools
+
+During a conversation, the agent:
+
+1. **Identifies Need**: Recognizes when a tool might be helpful
+2. **Selects Tool**: Chooses the appropriate tool based on descriptions
+3. **Extracts Parameters**: Gathers required information from the conversation
+4. **Calls Tool**: Makes the HTTP request
+5. **Processes Response**: Interprets the tool's response
+6. **Continues Conversation**: Uses the information naturally in dialogue
+
+All of this happens automatically - you don't need to explicitly trigger tool calls.
+
+## Expected Response Format
+
+Your API should return JSON data that the agent can interpret. Simple responses work best:
+
+```json
+{
+  "success": true,
+  "data": {
+    "customer_name": "John Doe",
+    "account_tier": "Premium",
+    "balance": 0,
+    "last_purchase": "2024-01-15"
+  }
+}
+```
+
+Or for errors:
+
+```json
+{
+  "success": false,
+  "error": "Customer not found"
+}
+```
+
+The agent will interpret the response and communicate it naturally to the customer.
+
+## Security Best Practices
+
+### Protect Your APIs
+
+1. **Use Authentication**: Always include API keys or tokens in headers
+2. **Validate Requests**: Verify requests come from Kejue
+3. **Rate Limiting**: Implement rate limits on your endpoints
+4. **HTTPS Only**: Never use unencrypted HTTP
+5. **IP Whitelisting**: Restrict access to Kejue's IP ranges
+
+### Sensitive Data
+
+Don't expose sensitive data unnecessarily:
+- Avoid returning full credit card numbers
+- Mask personal information when possible
+- Use minimal required permissions for API keys
+
+## Testing Tools
+
+Test your tools before assigning to production agents:
+
+1. **Manual Testing**: Call your API directly to verify responses
+2. **Test Agent**: Create a test agent with the tool
+3. **Test Calls**: Make test calls to verify tool behavior
+4. **Monitor Logs**: Check API logs to ensure calls are working
+
+## Troubleshooting
+
+### Tool Not Being Called
+
+**Possible causes:**
+- Description doesn't match conversation context
+- Agent doesn't have the tool assigned
+- Required information not available in conversation
+
+**Solution:**
+- Improve tool description
+- Guide conversation in system prompt
+- Mention the tool capability explicitly
+
+### Timeouts
+
+**Causes:**
+- API response too slow
+- Network issues
+- Backend processing delays
+
+**Solution:**
+- Optimize API performance
+- Increase timeout (cautiously)
+- Implement caching
+- Use async processing
+
+### Incorrect Parameters
+
+**Causes:**
+- Unclear parameter descriptions
+- Agent misunderstanding conversation
+- Missing required information
+
+**Solution:**
+- Improve parameter descriptions
+- Add examples in descriptions
+- Update system prompt with guidance
+
+## API Reference
+
+- [Create Tool](/docs/api-reference/tools/createTool)
+- [List Tools](/docs/api-reference/tools/listTools)
+- [Get Tool](/docs/api-reference/tools/getTool)
+- [Update Tool](/docs/api-reference/tools/updateTool)
+- [Delete Tool](/docs/api-reference/tools/deleteTool)
+
+## Next Steps
+
+- Learn about [Agents](/docs/core-concepts/agents) to assign tools
+- Explore [Context Variables](/docs/guides/context-variables) for dynamic data
+- Set up [Webhooks](/docs/guides/webhooks) for call notifications

@@ -1,0 +1,209 @@
+---
+title: Phone Numbers
+description: Connect telephony providers to handle inbound and outbound calls
+icon: Phone
+---
+
+## Introduction
+
+Phone numbers are the bridge between your agents and the phone network. Kejue supports multiple telephony providers, allowing you to use your existing numbers or provision new ones.
+
+## Supported Providers
+
+Kejue integrates with the following telephony providers:
+
+- **Twilio**: Industry-leading cloud communications platform
+- **SIP**: Standard SIP trunking for enterprise deployments
+
+## Provider Comparison
+
+| Feature | Twilio | SIP |
+|---------|--------|-------------|
+| Global Coverage | ✅ Excellent | ✅ Depends on trunk |
+| Setup Complexity | ⭐ Easy | ⭐⭐ Moderate |
+| Use Case | Quick setup | Enterprise |
+
+## Adding a Phone Number
+
+### Twilio
+
+To add a Twilio phone number:
+
+1. Purchase or identify a phone number in your Twilio account
+2. Get your Twilio credentials:
+   - Account SID
+   - Auth Token
+3. Add the number via API or dashboard
+
+```json
+{
+  "name": "Support Line",
+  "number": "+15551234567",
+  "provider": "twilio",
+  "agentId": "agent-uuid",
+  "twilioAccountSid": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "twilioAuthToken": "your-auth-token"
+}
+```
+
+<Callout type="info">
+Credentials are encrypted and stored securely. Your Auth Token is never exposed in API responses.
+</Callout>
+
+### SIP
+
+For SIP trunk configuration:
+
+```json
+{
+  "name": "Enterprise Trunk",
+  "number": "+15551234567",
+  "provider": "sip",
+  "agentId": "agent-uuid",
+  "sipUsername": "your-username",
+  "sipPassword": "your-password",
+  "sipProxy": "sip.your-provider.com",
+  "sipOutboundProxy": "outbound.your-provider.com",
+  "sipAuthUser": "auth-username"
+}
+```
+
+Required fields for SIP:
+- `sipUsername`: SIP authentication username
+- `sipPassword`: SIP authentication password  
+- `sipProxy`: SIP server address
+
+Optional fields:
+- `sipOutboundProxy`: Separate outbound proxy if needed
+- `sipAuthUser`: Alternative auth username
+
+## Assigning Agents
+
+Each phone number can be assigned to a default agent. When an inbound call arrives on that number, it will be handled by the assigned agent.
+
+```json
+{
+  "agentId": "agent-uuid"
+}
+```
+
+## Inbound Call Flow
+
+When someone calls your phone number:
+
+1. Call arrives at your telephony provider (Twilio/SIP)
+2. Provider sends webhook to Kejue platform
+3. Kejue validates the number and organization
+4. Platform checks organization balance (if applicable)
+5. Assigned agent configuration is loaded
+6. WebSocket stream is established with the agent runtime
+7. Conversation begins
+
+## Outbound Calls
+
+Use phone numbers to make outbound calls via the API:
+
+```json
+POST /api/calls/outbound
+{
+  "agentId": "agent-uuid",
+  "phoneNumberId": "phone-uuid",
+  "to": "+15559876543",
+  "contextVariables": {
+    "customer_name": "Jane Smith",
+    "reason": "Follow-up on support ticket #1234"
+  }
+}
+```
+
+The call will be placed from the specified phone number using its configured provider.
+
+## Webhook Configuration
+
+After adding a phone number, you'll need to configure webhooks with your provider:
+
+### Twilio Webhook URLs
+
+Configure these in your Twilio phone number settings:
+
+**Voice URL (Incoming calls):**
+```
+https://api.chorus-ai.co/twilio/answer
+```
+
+**Method:** POST
+
+### SIP Configuration
+
+For Jambonz application settings:
+
+**Call Webhook:**
+```
+https://api.chorus-ai.co/jambonz/webhook
+```
+
+**Call Status Webhook:**
+```
+https://api.chorus-ai.co/api/jambonz/status
+```
+
+## Security
+
+All credentials (Twilio Auth Tokens, SIP passwords) are:
+- Encrypted at rest using AES-256
+- Never returned in API responses
+- Stored securely in the database
+- Only decrypted during call initiation
+
+## Testing
+
+Test your phone number configuration:
+
+1. Call your phone number from any phone
+2. Verify the agent answers and can converse
+3. Check call logs in the dashboard
+
+For outbound testing, use the "Make Test Call" feature in the dashboard.
+
+## Troubleshooting
+
+### Calls Not Connecting
+
+**Check:**
+- Webhook URLs are correctly configured in your provider
+- Phone number is active in your provider account
+- Agent is assigned and active
+- Organization has sufficient balance
+
+### One-Way Audio
+
+**Possible causes:**
+- NAT/Firewall issues (SIP providers)
+- Incorrect SIP proxy configuration
+- Network connectivity problems
+
+**Solution:**
+- Verify SIP settings
+- Check outbound proxy configuration
+- Test from different network
+
+### Authentication Errors
+
+**Check:**
+- Twilio Account SID and Auth Token are correct
+- SIP credentials match your trunk configuration
+- Credentials haven't expired or been rotated
+
+## API Reference
+
+- [Create Phone Number](/docs/api-reference/phone-numbers/createPhoneNumber)
+- [List Phone Numbers](/docs/api-reference/phone-numbers/listPhoneNumbers)
+- [Get Phone Number](/docs/api-reference/phone-numbers/getPhoneNumber)
+- [Update Phone Number](/docs/api-reference/phone-numbers/updatePhoneNumber)
+- [Delete Phone Number](/docs/api-reference/phone-numbers/deletePhoneNumber)
+
+## Next Steps
+
+- Learn about [Agents](/docs/core-concepts/agents) to configure call behavior
+- Explore [Calls](/docs/core-concepts/calls) to start making calls
+- Set up [Webhooks](/docs/guides/webhooks) for call notifications

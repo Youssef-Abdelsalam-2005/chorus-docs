@@ -1,0 +1,75 @@
+
+[0m[2m[35m$[0m [2m[1mbun run build:pre && next build && bun run build:post[0m
+[0m[2m[35m$[0m [2m[1mbun ./scripts/pre-build.ts[0m
+[MDX] generated files in 71.2868639999997ms
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/agents/listAgents.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/agents/updateAgent.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/agents/getAgent.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/tools/createTool.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/calls/listCalls.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/tools/listTools.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/voices/listVoices.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/voices/getVoice.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/tools/getTool.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/phone-numbers/deletePhoneNumber.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/calls/getCall.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/agents/createAgent.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/slm-models/listSlmModels.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/tools/updateTool.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/phone-numbers/createPhoneNumber.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/phone-numbers/listPhoneNumbers.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/slm-models/getSlmModel.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/phone-numbers/updatePhoneNumber.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/agents/deleteAgent.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/phone-numbers/getPhoneNumber.mdx
+Generated: /home/yxa/Work/kejue/platform/apps/docs-new/content/docs/api-reference/(generated)/tools/deleteTool.mdx
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ [33m[1m⚠[22m[39m Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /home/yxa/bun.lock as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * /home/yxa/Work/kejue/platform/apps/docs-new/bun.lock
+   * /home/yxa/Work/kejue/platform/bun.lock
+
+(node:96012) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+   [1m[38;2;173;127;168m▲ Next.js 16.0.1[39m[22m (Turbopack)
+   - Environments: .env
+
+[MDX] generated files in 401.38218400000005ms
+ [37m[1m [22m[39m Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+(node:96151) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96159) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96169) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96197) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96204) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96235) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96304) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96262) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96281) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96312) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96321) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96340) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96331) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96364) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96374) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:96375) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+[0m[31merror[0m[2m:[0m script [1m"build"[0m exited with code 130[0m

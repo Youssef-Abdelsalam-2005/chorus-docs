@@ -1,0 +1,10 @@
+{
+  "title": "Guides",
+  "$schema": "../../../../.source/json-schema/docs.meta.json",
+  "icon": "Map",
+  "pages": [
+    "quickstart",
+    "context-variables",
+    "webhooks"
+  ]
+}

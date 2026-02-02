@@ -1,0 +1,589 @@
+---
+title: Webhooks
+description: Receive real-time notifications when calls complete
+icon: Webhook
+---
+
+## Introduction
+
+Webhooks allow you to receive HTTP POST requests from Chorus when important events occur, such as calls completing. Instead of polling the API for updates, Chorus proactively sends data to your server in real-time.
+
+## What are Webhooks?
+
+When a call ends, Chorus can automatically send a POST request to your server containing:
+
+- Call transcript
+- Duration and status
+- Recording URL
+- AI-generated summary
+- Extracted data fields
+- Metadata
+
+This enables you to:
+- Update your database with call outcomes
+- Trigger follow-up workflows
+- Send notifications to your team
+- Sync data between systems
+- Generate reports
+
+## Setting Up Webhooks
+
+### Configure Agent Webhook
+
+Add webhook settings to your agent configuration:
+
+```json
+POST /v1/agents
+{
+  "name": "Support Agent",
+  "systemPrompt": "You are a helpful support agent...",
+  "postCallWebhookUrl": "https://your-app.com/webhooks/call-completed",
+  "postCallWebhookSecret": "your-secret-key-here"
+}
+```
+
+### Webhook Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `postCallWebhookUrl` | Yes | Your HTTPS endpoint to receive webhooks |
+| `postCallWebhookSecret` | Recommended | Secret key for verifying webhook authenticity |
+
+<Callout type="warning">
+Always use HTTPS for webhook URLs to ensure data is encrypted in transit.
+</Callout>
+
+## Webhook Payload
+
+When a call completes, Chorus sends a POST request with this structure:
+
+```json
+{
+  "event": "call.completed",
+  "callId": "call-uuid",
+  "organizationId": "org-uuid",
+  "agentId": "agent-uuid",
+  "phoneNumberId": "phone-uuid",
+  "direction": "outbound",
+  "status": "completed",
+  "customerNumber": "+15551234567",
+  "durationSeconds": 245,
+  "startedAt": "2024-01-15T10:30:00Z",
+  "endedAt": "2024-01-15T10:34:05Z",
+  "recordingUrl": "https://storage.example.com/recordings/call-uuid.mp3",
+  "transcriptUrl": "https://storage.example.com/transcripts/call-uuid.json",
+  "summary": "Customer inquired about order #12345. Order is currently in transit and will arrive tomorrow. Customer was satisfied with the update.",
+  "extractedData": {
+    "customer_satisfied": true,
+    "issue_type": "Order Status",
+    "follow_up_needed": false
+  },
+  "contextVariables": {
+    "customer_name": "Jane Smith",
+    "order_id": "12345"
+  },
+  "metadata": {
+    "campaign": "order-followup",
+    "source": "shopify"
+  }
+}
+```
+
+### Payload Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `event` | string | Always `"call.completed"` |
+| `callId` | UUID | Unique call identifier |
+| `organizationId` | UUID | Your organization ID |
+| `agentId` | UUID | Agent that handled the call |
+| `phoneNumberId` | UUID | Phone number used (if applicable) |
+| `direction` | string | `"inbound"` or `"outbound"` |
+| `status` | string | Call final status (e.g., `"completed"`) |
+| `customerNumber` | string | The other party's phone number |
+| `durationSeconds` | number | Call duration in seconds |
+| `startedAt` | ISO 8601 | When the call started |
+| `endedAt` | ISO 8601 | When the call ended |
+| `recordingUrl` | string | URL to audio recording (if available) |
+| `transcriptUrl` | string | URL to full transcript (if available) |
+| `summary` | string | AI-generated call summary |
+| `extractedData` | object | Structured data extracted per schema |
+| `contextVariables` | object | Variables passed when creating call |
+| `metadata` | object | Custom metadata from call creation |
+
+## Implementing a Webhook Endpoint
+
+### Node.js / Express
+
+```javascript
+const express = require('express');
+const crypto = require('crypto');
+const app = express();
+
+app.post('/webhooks/call-completed', express.json(), (req, res) => {
+  // Verify webhook signature
+  const signature = req.headers['x-chorus-signature'];
+  const secret = process.env.WEBHOOK_SECRET;
+  
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(JSON.stringify(req.body))
+    .digest('hex');
+  
+  if (signature !== expectedSignature) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Process webhook
+  const { callId, status, durationSeconds, extractedData, summary } = req.body;
+  
+  console.log(`Call ${callId} completed:`, {
+    status,
+    duration: durationSeconds,
+    extractedData,
+    summary
+  });
+  
+  // Update your database
+  await db.calls.update(callId, {
+    status,
+    duration: durationSeconds,
+    summary,
+    extractedData
+  });
+  
+  // Trigger follow-up actions
+  if (extractedData.follow_up_needed) {
+    await scheduleFollowUp(callId);
+  }
+  
+  // Respond quickly
+  res.status(200).send('OK');
+});
+
+app.listen(3000);
+```
+
+### Python / Flask
+
+```python
+from flask import Flask, request, jsonify
+import hmac
+import hashlib
+import json
+import os
+
+app = Flask(__name__)
+
+@app.route('/webhooks/call-completed', methods=['POST'])
+def webhook():
+    # Verify webhook signature
+    signature = request.headers.get('X-Chorus-Signature')
+    secret = os.environ.get('WEBHOOK_SECRET').encode()
+    
+    expected_signature = hmac.new(
+        secret,
+        request.data,
+        hashlib.sha256
+    ).hexdigest()
+    
+    if signature != expected_signature:
+        return 'Invalid signature', 401
+    
+    # Process webhook
+    data = request.json
+    call_id = data['callId']
+    status = data['status']
+    extracted_data = data.get('extractedData', {})
+    
+    print(f"Call {call_id} completed: {status}")
+    
+    # Update database
+    db.calls.update(call_id, {
+        'status': status,
+        'duration': data['durationSeconds'],
+        'summary': data['summary'],
+        'extracted_data': extracted_data
+    })
+    
+    # Trigger actions
+    if extracted_data.get('follow_up_needed'):
+        schedule_follow_up(call_id)
+    
+    return 'OK', 200
+
+if __name__ == '__main__':
+    app.run(port=3000)
+```
+
+### PHP
+
+```php
+<?php
+$payload = file_get_contents('php://input');
+$signature = $_SERVER['HTTP_X_KEJUE_SIGNATURE'];
+$secret = getenv('WEBHOOK_SECRET');
+
+// Verify signature
+$expectedSignature = hash_hmac('sha256', $payload, $secret);
+
+if (!hash_equals($expectedSignature, $signature)) {
+    http_response_code(401);
+    die('Invalid signature');
+}
+
+// Parse webhook
+$data = json_decode($payload, true);
+
+$callId = $data['callId'];
+$status = $data['status'];
+$extractedData = $data['extractedData'] ?? [];
+
+// Update database
+$db->calls->update($callId, [
+    'status' => $status,
+    'duration' => $data['durationSeconds'],
+    'summary' => $data['summary'],
+    'extracted_data' => $extractedData
+]);
+
+// Trigger follow-ups
+if ($extractedData['follow_up_needed'] ?? false) {
+    scheduleFollowUp($callId);
+}
+
+http_response_code(200);
+echo 'OK';
+?>
+```
+
+## Verifying Webhook Signatures
+
+To ensure webhooks come from Chorus and haven't been tampered with, always verify the signature.
+
+### How Signatures Work
+
+1. Chorus generates a signature using HMAC-SHA256
+2. The secret key is your `postCallWebhookSecret`
+3. The signature is sent in the `X-Chorus-Signature` header
+4. You regenerate the signature and compare
+
+### Verification Example
+
+```javascript
+const crypto = require('crypto');
+
+function verifyWebhookSignature(payload, signature, secret) {
+  const expectedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(JSON.stringify(payload))
+    .digest('hex');
+  
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+// Usage
+if (!verifyWebhookSignature(req.body, req.headers['x-chorus-signature'], secret)) {
+  return res.status(401).send('Invalid signature');
+}
+```
+
+<Callout type="error">
+Always verify webhook signatures before processing the payload. This prevents malicious actors from sending fake webhooks to your endpoint.
+</Callout>
+
+## Responding to Webhooks
+
+### Response Requirements
+
+- **Status Code**: Return `200 OK` for successful processing
+- **Response Time**: Respond within 10 seconds
+- **Response Body**: Can be any text (e.g., "OK", "Received")
+
+### Quick Response Pattern
+
+Process webhooks asynchronously to respond quickly:
+
+```javascript
+app.post('/webhooks/call-completed', async (req, res) => {
+  // Verify signature first
+  if (!verifySignature(req)) {
+    return res.status(401).send('Invalid signature');
+  }
+  
+  // Respond immediately
+  res.status(200).send('OK');
+  
+  // Process asynchronously
+  processWebhookAsync(req.body).catch(err => {
+    console.error('Webhook processing failed:', err);
+  });
+});
+
+async function processWebhookAsync(data) {
+  // Update database
+  await updateCallRecord(data);
+  
+  // Trigger workflows
+  await triggerFollowUps(data);
+  
+  // Send notifications
+  await notifyTeam(data);
+}
+```
+
+## Common Use Cases
+
+### Update CRM
+
+Sync call data to your CRM:
+
+```javascript
+async function updateCRM(webhookData) {
+  const { customerNumber, summary, extractedData } = webhookData;
+  
+  // Find or create contact
+  const contact = await crm.contacts.findByPhone(customerNumber);
+  
+  // Add call note
+  await crm.notes.create({
+    contactId: contact.id,
+    note: summary,
+    type: 'phone_call',
+    duration: webhookData.durationSeconds
+  });
+  
+  // Update custom fields
+  if (extractedData.customer_interest) {
+    await crm.contacts.update(contact.id, {
+      product_interest: extractedData.customer_interest
+    });
+  }
+}
+```
+
+### Trigger Follow-ups
+
+Schedule follow-up actions based on call outcomes:
+
+```javascript
+async function handleFollowUp(webhookData) {
+  const { extractedData, callId, customerNumber } = webhookData;
+  
+  if (extractedData.follow_up_needed) {
+    // Schedule follow-up call
+    await scheduleCall({
+      to: customerNumber,
+      agentId: webhookData.agentId,
+      scheduledAt: getFollowUpDate(extractedData.preferred_date),
+      contextVariables: {
+        previous_call_id: callId,
+        follow_up_reason: extractedData.follow_up_reason
+      }
+    });
+  }
+}
+```
+
+### Send Notifications
+
+Alert your team about important calls:
+
+```javascript
+async function notifyTeam(webhookData) {
+  const { extractedData, summary, recordingUrl } = webhookData;
+  
+  // Send Slack notification for escalations
+  if (extractedData.escalation_needed) {
+    await slack.sendMessage({
+      channel: '#support-escalations',
+      text: `🚨 Escalation needed for call ${webhookData.callId}`,
+      attachments: [{
+        title: 'Call Summary',
+        text: summary,
+        fields: [
+          { title: 'Customer', value: webhookData.customerNumber },
+          { title: 'Duration', value: `${webhookData.durationSeconds}s` },
+          { title: 'Recording', value: recordingUrl }
+        ]
+      }]
+    });
+  }
+}
+```
+
+### Generate Reports
+
+Track call metrics:
+
+```javascript
+async function trackMetrics(webhookData) {
+  const { durationSeconds, extractedData, status } = webhookData;
+  
+  // Log to analytics
+  await analytics.track('call_completed', {
+    duration: durationSeconds,
+    status,
+    customer_satisfied: extractedData.customer_satisfied,
+    issue_resolved: extractedData.issue_resolved,
+    agent_id: webhookData.agentId
+  });
+  
+  // Update dashboard metrics
+  await metrics.increment('calls_completed');
+  await metrics.average('call_duration', durationSeconds);
+  
+  if (extractedData.customer_satisfied) {
+    await metrics.increment('satisfied_customers');
+  }
+}
+```
+
+## Testing Webhooks
+
+### Local Testing with ngrok
+
+```bash
+# Install ngrok
+npm install -g ngrok
+
+# Start your local server
+node server.js
+
+# Expose it publicly
+ngrok http 3000
+
+# Use the ngrok URL as your webhook URL
+# Example: https://abc123.ngrok.io/webhooks/call-completed
+```
+
+### Manual Testing
+
+Send a test webhook manually:
+
+```bash
+curl -X POST https://your-app.com/webhooks/call-completed \
+  -H "Content-Type: application/json" \
+  -H "X-Chorus-Signature: your-test-signature" \
+  -d '{
+    "event": "call.completed",
+    "callId": "test-call-id",
+    "status": "completed",
+    "durationSeconds": 120,
+    "summary": "Test call summary"
+  }'
+```
+
+## Troubleshooting
+
+### Webhook Not Received
+
+**Check:**
+- Webhook URL is correctly configured in agent
+- URL is publicly accessible (not localhost)
+- Firewall allows incoming requests
+- SSL certificate is valid (for HTTPS)
+
+**Debug:**
+```bash
+# Test your endpoint
+curl -X POST https://your-app.com/webhooks/call-completed \
+  -H "Content-Type: application/json" \
+  -d '{"test": true}'
+```
+
+### Signature Verification Failing
+
+**Common issues:**
+- Using wrong secret key
+- Comparing signatures incorrectly (use timing-safe comparison)
+- Modifying payload before verification
+- Incorrect encoding/decoding
+
+**Solution:**
+```javascript
+// Log both signatures for debugging (remove in production)
+console.log('Received:', signature);
+console.log('Expected:', expectedSignature);
+
+// Use timing-safe comparison
+return crypto.timingSafeEqual(
+  Buffer.from(signature),
+  Buffer.from(expectedSignature)
+);
+```
+
+### Timeouts
+
+**Causes:**
+- Processing taking too long
+- Blocking operations in webhook handler
+- Database queries not optimized
+
+**Solution:**
+- Respond immediately, process async
+- Use job queues for heavy operations
+- Optimize database queries
+- Set reasonable timeouts
+
+### Duplicate Webhooks
+
+Chorus may retry webhooks if it doesn't receive a 200 response. Handle this with idempotency:
+
+```javascript
+const processedCalls = new Set();
+
+app.post('/webhooks/call-completed', async (req, res) => {
+  const { callId } = req.body;
+  
+  // Check if already processed
+  if (processedCalls.has(callId)) {
+    return res.status(200).send('Already processed');
+  }
+  
+  // Mark as processed
+  processedCalls.add(callId);
+  
+  // Process webhook
+  await processWebhook(req.body);
+  
+  res.status(200).send('OK');
+});
+```
+
+## Security Best Practices
+
+1. **Always Use HTTPS**: Never use HTTP for webhook endpoints
+2. **Verify Signatures**: Check every webhook signature
+3. **Validate Payload**: Ensure required fields are present
+4. **Rate Limiting**: Protect against abuse
+5. **IP Whitelist**: Restrict to Chorus's IP ranges (if needed)
+6. **Secrets Rotation**: Rotate webhook secrets periodically
+7. **Audit Logs**: Log all webhook receipts for security monitoring
+
+## Retry Policy
+
+If your endpoint doesn't respond with a 200 status code, Chorus will retry:
+
+- **Initial Retry**: After 1 minute
+- **Second Retry**: After 5 minutes
+- **Third Retry**: After 15 minutes
+- **Final Retry**: After 1 hour
+
+After 4 failed attempts, Chorus stops retrying. Ensure your endpoint is reliable!
+
+## API Reference
+
+Webhook configuration is part of agent creation:
+
+- [Create Agent](/docs/api-reference/agents/createAgent)
+- [Update Agent](/docs/api-reference/agents/updateAgent)
+
+## Next Steps
+
+- Learn about [Extracted Data](/docs/core-concepts/agents#post-call-configuration) configuration
+- Explore [Context Variables](/docs/guides/context-variables) to pass data to agents
+- Read about [Calls](/docs/core-concepts/calls) to understand call lifecycle

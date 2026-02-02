@@ -1,0 +1,277 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/solar.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
+@import "fumadocs-openapi/css/preset.css";
+@import "tw-animate-css";
+
+@source ".";
+@source "../components";
+@source "../content";
+@source "../app";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  @keyframes stroke {
+    from {
+      stroke-dasharray: 1000;
+    }
+
+    to {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 2000;
+    }
+  }
+
+  --animate-stroke: stroke 5s linear infinite;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-gradient-radial: radial-gradient(circle, var(--tw-gradient-stops));
+  --color-repeat-gradient-to-r: repeating-linear-gradient(
+    to right,
+    var(--tw-gradient-stops)
+  );
+  --color-repeat-gradient-to-br: repeating-linear-gradient(
+    to bottom right,
+    var(--tw-gradient-stops)
+  );
+}
+
+@import "tailwindcss";
+@import "fumadocs-ui/css/solar.css";
+@import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
+@import "fumadocs-openapi/css/preset.css";
+@import "tw-animate-css";
+
+@source ".";
+@source "../components";
+@source "../content";
+@source "../app";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  @keyframes stroke {
+    from {
+      stroke-dasharray: 1000;
+    }
+
+    to {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 2000;
+    }
+  }
+
+  --animate-stroke: stroke 5s linear infinite;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-gradient-radial: radial-gradient(circle, var(--tw-gradient-stops));
+  --color-repeat-gradient-to-r: repeating-linear-gradient(
+    to right,
+    var(--tw-gradient-stops)
+  );
+  --color-repeat-gradient-to-br: repeating-linear-gradient(
+    to bottom right,
+    var(--tw-gradient-stops)
+  );
+}
+
+/* Custom theme variables with higher specificity */
+html:root,
+html.light,
+:root {
+  --radius: 0.375rem;
+
+  /* Light Theme - Matching web app */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 15%);
+
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 15%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 15%);
+
+  /* Primary orange from web app */
+  --primary: hsl(45, 93%, 47%);
+  --primary-foreground: hsl(0, 0%, 0%);
+
+  /* Secondary from web app */
+  --secondary: hsl(220, 13%, 96%);
+  --secondary-foreground: hsl(220, 8.9%, 46%);
+
+  /* Muted tones from web app */
+  --muted: hsl(220, 14%, 96%);
+  --muted-foreground: hsl(220, 8.9%, 46%);
+
+  /* Accent from web app */
+  --accent: hsl(45, 100%, 96%);
+  --accent-foreground: hsl(32, 81%, 29%);
+
+  --destructive: hsl(0, 84%, 60%);
+
+  /* Borders and inputs */
+  --border: hsl(220, 13%, 91%);
+  --input: hsl(0, 0%, 100%);
+  --ring: hsl(45, 93%, 47%);
+
+  --index-color: hsl(45, 93%, 47%);
+  --api-reference-color: hsl(45, 93%, 47%);
+  --changelog-color: hsl(0, 0%, 15%);
+
+  /* Fumadocs variables - Override defaults */
+  --color-fd-background: hsl(0, 0%, 100%) !important;
+  --color-fd-foreground: hsl(0, 0%, 15%) !important;
+  --color-fd-card: hsl(0, 0%, 100%) !important;
+  --color-fd-card-foreground: hsl(0, 0%, 15%) !important;
+  --color-fd-popover: hsl(0, 0%, 100%) !important;
+  --color-fd-popover-foreground: hsl(0, 0%, 15%) !important;
+  --color-fd-primary: hsl(45, 93%, 47%) !important;
+  --color-fd-primary-foreground: hsl(0, 0%, 0%) !important;
+  --color-fd-secondary: hsl(220, 13%, 96%) !important;
+  --color-fd-secondary-foreground: hsl(220, 8.9%, 46%) !important;
+  --color-fd-muted: hsl(220, 14%, 96%) !important;
+  --color-fd-muted-foreground: hsl(220, 8.9%, 46%) !important;
+  --color-fd-accent: hsl(45, 100%, 96%) !important;
+  --color-fd-accent-foreground: hsl(32, 81%, 29%) !important;
+  --color-fd-destructive: hsl(0, 84%, 60%) !important;
+  --color-fd-destructive-foreground: hsl(0, 0%, 100%) !important;
+  --color-fd-border: hsl(220, 13%, 91%) !important;
+  --color-fd-ring: hsl(45, 93%, 47%) !important;
+}
+
+html.dark,
+.dark {
+  /* Dark Theme - Matching web app */
+  --background: hsl(0, 0%, 9%) !important;
+  --foreground: hsl(0, 0%, 90%) !important;
+
+  --card: hsl(0, 0%, 15%) !important;
+  --card-foreground: hsl(0, 0%, 90%) !important;
+  --popover: hsl(0, 0%, 15%) !important;
+  --popover-foreground: hsl(0, 0%, 90%) !important;
+
+  /* Primary orange from web app */
+  --primary: hsl(45, 93%, 47%) !important;
+  --primary-foreground: hsl(0, 0%, 0%) !important;
+
+  /* Dark secondary from web app */
+  --secondary: hsl(0, 0%, 15%) !important;
+  --secondary-foreground: hsl(0, 0%, 90%) !important;
+
+  --muted: hsl(0, 0%, 15%) !important;
+  --muted-foreground: hsl(0, 0%, 64%) !important;
+
+  /* Dark accent from web app */
+  --accent: hsl(32, 81%, 29%) !important;
+  --accent-foreground: hsl(48, 96%, 77%) !important;
+
+  --destructive: hsl(0, 84%, 60%) !important;
+
+  --border: hsl(0, 0%, 25%) !important;
+  --input: hsl(0, 0%, 25%) !important;
+  --ring: hsl(45, 93%, 47%) !important;
+
+  --index-color: hsl(45, 93%, 47%) !important;
+  --api-reference-color: hsl(45, 93%, 47%) !important;
+  --changelog-color: hsl(0, 0%, 90%) !important;
+
+  /* Fumadocs variables */
+  --color-fd-background: hsl(0, 0%, 9%) !important;
+  --color-fd-foreground: hsl(0, 0%, 90%) !important;
+  --color-fd-card: hsl(0, 0%, 15%) !important;
+  --color-fd-card-foreground: hsl(0, 0%, 90%) !important;
+  --color-fd-popover: hsl(0, 0%, 15%) !important;
+  --color-fd-popover-foreground: hsl(0, 0%, 90%) !important;
+  --color-fd-primary: hsl(45, 93%, 47%) !important;
+  --color-fd-primary-foreground: hsl(0, 0%, 0%) !important;
+  --color-fd-secondary: hsl(0, 0%, 15%) !important;
+  --color-fd-secondary-foreground: hsl(0, 0%, 90%) !important;
+  --color-fd-muted: hsl(0, 0%, 15%) !important;
+  --color-fd-muted-foreground: hsl(0, 0%, 64%) !important;
+  --color-fd-accent: hsl(32, 81%, 29%) !important;
+  --color-fd-accent-foreground: hsl(48, 96%, 77%) !important;
+  --color-fd-destructive: hsl(0, 84%, 60%) !important;
+  --color-fd-destructive-foreground: hsl(0, 0%, 100%) !important;
+  --color-fd-border: hsl(0, 0%, 25%) !important;
+  --color-fd-ring: hsl(45, 93%, 47%) !important;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  body {
+    overscroll-behavior-y: none;
+    background-color: var(--color-background);
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-foreground);
+  }
+
+  .dark ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-foreground);
+  }
+
+  .\(index\) {
+    --primary: var(--index-color) !important;
+    --color-fd-primary: var(--index-color) !important;
+  }
+
+  .api-reference {
+    --primary: var(--api-reference-color) !important;
+    --color-fd-primary: var(--api-reference-color) !important;
+  }
+
+  .changelog {
+    --primary: var(--changelog-color) !important;
+    --color-fd-primary: var(--changelog-color) !important;
+  }
+}
+
+.dark [data-hide-on-theme="dark"],
+.light [data-hide-on-theme="light"] {
+  display: none;
+}
+
+#nd-sidebar {
+  @apply border-e;
+  background-color: var(--color-background);
+}
+
+/* header &[data-search-full] {
+  @apply rounded-xl;
+} */

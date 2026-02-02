@@ -1,0 +1,308 @@
+---
+title: Agents
+description: Configure intelligent voice AI agents for phone conversations
+icon: Bot
+---
+
+## Introduction
+
+Agents are the core of the Kejue platform. An agent is an AI-powered conversational system that can handle phone calls autonomously, responding to customers in natural language and executing actions through custom tools.
+
+## What is an Agent?
+
+An **Agent** is a configurable voice AI assistant that:
+
+- Handles inbound and outbound phone calls
+- Follows a system prompt to guide conversations
+- Uses speech-to-text, language models, and text-to-speech for natural interactions
+- Can call custom HTTP tools to fetch data or trigger actions
+- Extracts structured data from conversations
+- Sends webhooks with call summaries and results
+
+## Creating an Agent
+
+### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | A descriptive name for your agent (e.g., "Support Agent", "Sales Qualifier") |
+
+### Optional Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `systemPrompt` | string | Instructions that guide the agent's behavior (max 12,000 characters) |
+| `slmModelId` | UUID | The language model to use for the agent |
+| `voiceId` | UUID | The voice to use for speech synthesis |
+| `voiceSpeed` | number | Voice speed multiplier (0.6 - 1.5, default: 1.0) |
+| `isActive` | boolean | Whether the agent is active and can handle calls |
+| `allowEndCall` | boolean | Whether the agent can end calls proactively |
+| `firstSpeaker` | enum | Who speaks first: `"user"` or `"agent"` (default: `"user"`) |
+| `agentGreeting` | string | Custom greeting message (max 1,000 characters) |
+| `agentGreetingEnabled` | boolean | Whether to use a custom greeting |
+| `maxCallDurationSeconds` | integer | Maximum call duration in seconds (30-3600, default: 600) |
+| `languageHint` | string | ISO 639-1 language code for transcription (e.g., "en", "ar") |
+
+## System Prompt
+
+The system prompt is the most important configuration for your agent. It defines the agent's personality, goals, and conversation flow.
+
+### Best Practices
+
+```
+You are a friendly customer support agent for Acme Inc. Your goal is to help 
+customers resolve their issues quickly and professionally.
+
+Key Guidelines:
+- Always greet the customer warmly
+- Ask clarifying questions to understand their issue
+- Be concise and avoid technical jargon
+- If you can't help, offer to transfer to a human agent
+- End calls politely and confirm if the issue was resolved
+
+Important Context:
+- Company hours: Monday-Friday, 9 AM - 5 PM EST
+- Support email: support@acme.com
+- Return policy: 30 days with receipt
+```
+
+### Using Context Variables
+
+You can use template variables in your system prompt that get replaced with call-specific data:
+
+```
+You are calling {{customer_name}} about their recent order #{{order_id}}.
+
+Order Details:
+- Product: {{product_name}}
+- Order Date: {{order_date}}
+- Shipping Status: {{shipping_status}}
+
+Ask if they have any questions about their order.
+```
+
+When creating a call, pass these variables in the `contextVariables` field:
+
+```json
+{
+  "agentId": "agent-uuid",
+  "phoneNumberId": "phone-uuid",
+  "to": "+15551234567",
+  "contextVariables": {
+    "customer_name": "John Doe",
+    "order_id": "12345",
+    "product_name": "Premium Widget",
+    "order_date": "2024-01-15",
+    "shipping_status": "In Transit"
+  }
+}
+```
+
+## Voice and Model Selection
+
+### Language Models
+
+Choose from available language models optimized for real-time conversations. Different models offer various capabilities:
+
+- Faster response times
+- Better multilingual support
+- Enhanced reasoning abilities
+- Cost optimization
+
+View available models using the `/v1/slm-models` endpoint.
+
+### Voices
+
+Select from a variety of voices to match your brand and use case. Configure:
+
+- **Voice ID**: The specific voice to use
+- **Voice Speed**: Adjust speech rate (0.6x to 1.5x)
+
+View available voices using the `/v1/voices` endpoint.
+
+## First Speaker and Greetings
+
+### First Speaker
+
+Control who speaks first on the call:
+
+- **`user`** (default): Agent waits for the person to speak first
+- **`agent`**: Agent speaks immediately when the call connects
+
+### Agent Greeting
+
+When `firstSpeaker` is set to `"agent"`, you can configure the greeting:
+
+- **AI-Generated** (`agentGreetingEnabled: false`): Agent generates a contextual greeting
+- **Custom Message** (`agentGreetingEnabled: true`): Use your own greeting text
+
+```json
+{
+  "firstSpeaker": "agent",
+  "agentGreeting": "Hi {{customer_name}}, this is calling from Acme Inc. Do you have a moment to talk about your recent inquiry?",
+  "agentGreetingEnabled": true
+}
+```
+
+## Tools
+
+Agents can be configured with custom HTTP tools that allow them to:
+
+- Fetch customer data from your CRM
+- Check inventory or order status
+- Schedule appointments
+- Create support tickets
+- Trigger workflows
+
+Learn more in the [Tools documentation](/docs/core-concepts/tools).
+
+## Post-Call Configuration
+
+### Call Summaries
+
+Enable automatic call summarization:
+
+```json
+{
+  "postCallSummaryEnabled": true
+}
+```
+
+### Data Extraction
+
+Extract structured data from conversations using a schema:
+
+```json
+{
+  "postCallExtractionSchema": [
+    {
+      "name": "customer_interest",
+      "description": "What product or service is the customer interested in?",
+      "type": "string"
+    },
+    {
+      "name": "follow_up_needed",
+      "description": "Does the customer need a follow-up call?",
+      "type": "boolean"
+    },
+    {
+      "name": "budget",
+      "description": "What is the customer's budget range?",
+      "type": "number"
+    }
+  ]
+}
+```
+
+### Webhooks
+
+Receive POST requests when calls complete:
+
+```json
+{
+  "postCallWebhookUrl": "https://your-app.com/webhooks/call-completed",
+  "postCallWebhookSecret": "your-webhook-secret"
+}
+```
+
+The webhook payload includes:
+- Call duration and status
+- Transcript and recording URLs
+- AI-generated summary
+- Extracted data fields
+
+Learn more in the [Webhooks guide](/docs/guides/webhooks).
+
+## Agent Transfer
+
+Agents can transfer calls to other agents during a conversation. Configure transfer targets to enable seamless handoffs between specialized agents.
+
+For example:
+- Transfer from a general support agent to a technical specialist
+- Route sales calls to specific account managers
+- Escalate to supervisors when needed
+
+## Call Duration Limits
+
+Set maximum call duration to manage costs and prevent excessive calls:
+
+```json
+{
+  "maxCallDurationSeconds": 1800  // 30 minutes
+}
+```
+
+Calls automatically end when this limit is reached.
+
+## Example: Complete Agent Configuration
+
+```json
+{
+  "name": "Customer Support Agent",
+  "systemPrompt": "You are a helpful support agent for Acme Inc...",
+  "slmModelId": "model-uuid",
+  "voiceId": "voice-uuid",
+  "voiceSpeed": 1.0,
+  "isActive": true,
+  "allowEndCall": true,
+  "firstSpeaker": "agent",
+  "agentGreeting": "Hi, this is Alex from Acme support. How can I help you today?",
+  "agentGreetingEnabled": true,
+  "maxCallDurationSeconds": 600,
+  "postCallSummaryEnabled": true,
+  "postCallExtractionSchema": [
+    {
+      "name": "issue_resolved",
+      "description": "Was the customer's issue resolved?",
+      "type": "boolean"
+    }
+  ],
+  "postCallWebhookUrl": "https://your-app.com/webhook"
+}
+```
+
+## Next Steps
+
+- Learn about [Phone Numbers](/docs/core-concepts/phone-numbers) to connect telephony
+- Explore [Tools](/docs/core-concepts/tools) to add capabilities to your agents
+- Read the [Calls documentation](/docs/core-concepts/calls) to start making calls
+
+- How to interpret call outcomes
+- What information to extract from conversations
+- How to categorize call results
+- What actions to recommend based on call content
+
+### Variable Extraction
+
+Define custom variables to extract from calls, such as:
+
+- `budget` (integer) - Extract the lead's budget range
+- `timeline` (string) - Extract when they plan to make a decision
+- `company_size` (integer) - Extract company size information
+- Custom variables specific to your business needs
+
+For each variable, you can provide:
+
+- **Type**: integer, string, boolean, etc.
+- **Extraction guidance**: Instructions for the LLM on how to identify and extract this information
+- **Validation rules**: Ensure extracted values meet your requirements
+
+Extracted variables can then be used in:
+
+- WhatsApp template selection
+- Callback scheduling logic
+- Lead scoring and prioritization
+- Integration with your CRM or other systems
+
+## Related Guides
+
+- **[Calls](/docs/core-concepts/calls)** - Learn about creating individual calls
+- **[Campaigns](/docs/core-concepts/campaigns)** - Learn about batch campaigns
+- **[Call Context](/docs/configuration/call-context)** - Provide additional context to assistants
+- **[Callbacks](/docs/configuration/callbacks)** - Configure automatic retry logic
+
+## API Reference
+
+- **[Create Call](/docs/api-reference/calls/create_call_calls_post)** - Create calls with assistant configuration
+- **[Create Campaign](/docs/api-reference/campaigns/create_campaign_campaigns_post)** - Create campaigns with assistant groups
+

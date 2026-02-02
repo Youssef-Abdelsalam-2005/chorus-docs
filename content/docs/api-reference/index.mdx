@@ -1,0 +1,503 @@
+---
+title: API Reference
+description: Complete reference for the Chorus Platform API
+icon: Book
+---
+
+## Getting Started
+
+The Chorus API allows you to programmatically manage voice AI agents, phone numbers, tools, and calls. This RESTful API uses standard HTTP methods, returns JSON responses, and follows industry best practices.
+
+## Base URL
+
+All API requests should be made to:
+
+```
+https://api.chorus-ai.co/v1
+```
+
+## Authentication
+
+The Chorus API uses **Bearer token authentication**. Include your API key in the `Authorization` header of every request:
+
+```bash
+Authorization: Bearer sk_live_xxxxxxxxxxxxxxxx
+```
+
+### Getting Your API Key
+
+1. Log in to your [Chorus dashboard](https://app.chorus-ai.co)
+2. Navigate to **Settings > API Keys**
+3. Click **Create API Key**
+4. Copy your key and store it securely
+
+<Callout type="warning">
+**Keep your API key secure!** Never expose it in client-side code, public repositories, or share it publicly. Treat it like a password.
+</Callout>
+
+### Example Request
+
+```bash
+curl https://api.chorus-ai.co/v1/agents \
+  -H "Authorization: Bearer chorus_your_api_key_here"
+```
+
+## Request Format
+
+### Headers
+
+All requests must include:
+
+```
+Content-Type: application/json
+Authorization: Bearer YOUR_API_KEY
+```
+
+### Body
+
+Request bodies should be valid JSON:
+
+```bash
+curl -X POST https://api.chorus-ai.co/v1/agents \
+  -H "Authorization: Bearer chorus_xxx" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Support Agent",
+    "systemPrompt": "You are a helpful support agent...",
+    "isActive": true
+  }'
+```
+
+## Response Format
+
+All responses are returned as JSON.
+
+### Success Response
+
+```json
+{
+  "data": {
+    "id": "agent-uuid",
+    "name": "Support Agent",
+    "systemPrompt": "You are a helpful...",
+    "isActive": true,
+    "createdAt": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+### List Responses
+
+List endpoints return paginated data:
+
+```json
+{
+  "data": [
+    {"id": "1", "name": "Agent 1"},
+    {"id": "2", "name": "Agent 2"}
+  ],
+  "pagination": {
+    "total": 42,
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+### Error Response
+
+Errors include a descriptive message:
+
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "name",
+      "message": "Name is required"
+    }
+  ]
+}
+```
+
+## HTTP Status Codes
+
+| Code | Meaning | Description |
+|------|---------|-------------|
+| 200 | OK | Request succeeded |
+| 201 | Created | Resource created successfully |
+| 400 | Bad Request | Invalid request format or parameters |
+| 401 | Unauthorized | Invalid or missing API key |
+| 402 | Payment Required | Insufficient balance |
+| 404 | Not Found | Resource not found |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Server error (rare) |
+| 503 | Service Unavailable | Service temporarily unavailable |
+
+## Rate Limiting
+
+API requests are rate-limited to ensure fair usage and system stability.
+
+### Default Limits
+
+- **100 requests per minute** per API key (default)
+- Custom limits available for higher tiers
+
+### Rate Limit Headers
+
+Every response includes rate limit information:
+
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1609459200
+```
+
+### Handling Rate Limits
+
+If you exceed the rate limit, you'll receive a `429 Too Many Requests` response:
+
+```json
+{
+  "error": "Rate limit exceeded",
+  "retryAfter": 60
+}
+```
+
+**Best practices:**
+- Monitor rate limit headers
+- Implement exponential backoff
+- Cache responses when possible
+- Batch operations where supported
+
+## Pagination
+
+List endpoints support pagination via `limit` and `offset` parameters.
+
+### Parameters
+
+| Parameter | Type | Default | Max | Description |
+|-----------|------|---------|-----|-------------|
+| `limit` | integer | 50 | 100 | Number of results to return |
+| `offset` | integer | 0 | - | Number of results to skip |
+
+### Example
+
+```bash
+# Get first 10 agents
+curl "https://api.chorus-ai.co/v1/agents?limit=10&offset=0" \
+  -H "Authorization: Bearer chorus_xxx"
+
+# Get next 10 agents
+curl "https://api.chorus-ai.co/v1/agents?limit=10&offset=10" \
+  -H "Authorization: Bearer chorus_xxx"
+```
+
+### Response
+
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": 42,     // Total number of items
+    "limit": 10,     // Items per page
+    "offset": 0      // Current offset
+  }
+}
+```
+
+## Filtering and Search
+
+Some endpoints support filtering and search.
+
+### Search
+
+Use the `search` parameter to filter by name:
+
+```bash
+curl "https://api.chorus-ai.co/v1/agents?search=support" \
+  -H "Authorization: Bearer chorus_xxx"
+```
+
+## Idempotency
+
+To safely retry requests without creating duplicate resources, use idempotency keys for POST requests.
+
+```bash
+curl -X POST https://api.chorus-ai.co/v1/agents \
+  -H "Authorization: Bearer chorus_xxx" \
+  -H "Idempotency-Key: unique-request-id-123" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Agent"}'
+```
+
+If the same idempotency key is used multiple times within 24 hours, subsequent requests return the same response as the first request.
+
+## API Resources
+
+### Agents
+
+Manage voice AI agents that handle conversations:
+
+- [List Agents](/docs/api-reference/agents/listAgents) - `GET /v1/agents`
+- [Get Agent](/docs/api-reference/agents/getAgent) - `GET /v1/agents/{id}`
+- [Create Agent](/docs/api-reference/agents/createAgent) - `POST /v1/agents`
+- [Update Agent](/docs/api-reference/agents/updateAgent) - `PATCH /v1/agents/{id}`
+- [Delete Agent](/docs/api-reference/agents/deleteAgent) - `DELETE /v1/agents/{id}`
+
+### Phone Numbers
+
+Manage phone numbers for inbound and outbound calls:
+
+- [List Phone Numbers](/docs/api-reference/phone-numbers/listPhoneNumbers) - `GET /v1/phone-numbers`
+- [Get Phone Number](/docs/api-reference/phone-numbers/getPhoneNumber) - `GET /v1/phone-numbers/{id}`
+- [Create Phone Number](/docs/api-reference/phone-numbers/createPhoneNumber) - `POST /v1/phone-numbers`
+- [Update Phone Number](/docs/api-reference/phone-numbers/updatePhoneNumber) - `PATCH /v1/phone-numbers/{id}`
+- [Delete Phone Number](/docs/api-reference/phone-numbers/deletePhoneNumber) - `DELETE /v1/phone-numbers/{id}`
+
+### Tools
+
+Create custom HTTP tools for agents to call:
+
+- [List Tools](/docs/api-reference/tools/listTools) - `GET /v1/tools`
+- [Get Tool](/docs/api-reference/tools/getTool) - `GET /v1/tools/{id}`
+- [Create Tool](/docs/api-reference/tools/createTool) - `POST /v1/tools`
+- [Update Tool](/docs/api-reference/tools/updateTool) - `PATCH /v1/tools/{id}`
+- [Delete Tool](/docs/api-reference/tools/deleteTool) - `DELETE /v1/tools/{id}`
+
+### Calls
+
+View call history and details:
+
+- [List Calls](/docs/api-reference/calls/listCalls) - `GET /v1/calls`
+- [Get Call](/docs/api-reference/calls/getCall) - `GET /v1/calls/{id}`
+
+Note: Calls are created via `/api/calls/outbound` and `/api/calls/test` (see Guides).
+
+### Voices
+
+Browse available voice models:
+
+- [List Voices](/docs/api-reference/voices/listVoices) - `GET /v1/voices`
+- [Get Voice](/docs/api-reference/voices/getVoice) - `GET /v1/voices/{id}`
+
+### SLM Models
+
+Browse available language models:
+
+- [List SLM Models](/docs/api-reference/slm-models/listSlmModels) - `GET /v1/slm-models`
+- [Get SLM Model](/docs/api-reference/slm-models/getSlmModel) - `GET /v1/slm-models/{id}`
+
+## Webhooks
+
+Configure webhooks to receive real-time notifications when calls complete.
+
+Learn more in the [Webhooks Guide](/docs/guides/webhooks).
+
+## Data Types
+
+### UUIDs
+
+Resource identifiers are UUIDs (v4):
+
+```
+agent-uuid: "550e8400-e29b-41d4-a716-446655440000"
+```
+
+### Timestamps
+
+All timestamps are in ISO 8601 format (UTC):
+
+```
+2024-01-15T10:30:00Z
+```
+
+### Phone Numbers
+
+Phone numbers should use E.164 format:
+
+```
++15551234567
+```
+
+## Error Handling
+
+### Error Response Structure
+
+```json
+{
+  "error": "Error message",
+  "details": [
+    {
+      "field": "fieldName",
+      "message": "Specific error"
+    }
+  ]
+}
+```
+
+### Common Errors
+
+**400 Bad Request**
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "name",
+      "message": "Name is required"
+    }
+  ]
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "error": "Invalid API key"
+}
+```
+
+**404 Not Found**
+```json
+{
+  "error": "Agent not found"
+}
+```
+
+**429 Too Many Requests**
+```json
+{
+  "error": "Rate limit exceeded",
+  "retryAfter": 60
+}
+```
+
+## Best Practices
+
+### Security
+
+1. **Never expose API keys** in client-side code or public repositories
+2. **Use environment variables** to store API keys
+3. **Rotate keys regularly** for enhanced security
+4. **Use HTTPS** for all API requests
+5. **Validate webhook signatures** to ensure authenticity
+
+### Performance
+
+1. **Cache responses** when appropriate
+2. **Use pagination** for large datasets
+3. **Implement rate limiting** on your side
+4. **Batch operations** where possible
+5. **Monitor rate limit headers**
+
+### Reliability
+
+1. **Handle errors gracefully** with try-catch blocks
+2. **Implement retry logic** with exponential backoff
+3. **Use idempotency keys** for POST requests
+4. **Log all API interactions** for debugging
+5. **Monitor webhook delivery** and retry failures
+
+## SDKs and Libraries
+
+Official SDKs coming soon! In the meantime, the API works with any HTTP client:
+
+### Node.js
+
+```javascript
+const axios = require('axios');
+
+const api = axios.create({
+  baseURL: 'https://api.chorus-ai.co/v1',
+  headers: {
+    'Authorization': `Bearer ${process.env.CHORUS_API_KEY}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// List agents
+const agents = await api.get('/agents');
+
+// Create agent
+const agent = await api.post('/agents', {
+  name: 'Support Agent',
+  systemPrompt: '...'
+});
+```
+
+### Python
+
+```python
+import requests
+import os
+
+API_KEY = os.environ['CHORUS_API_KEY']
+BASE_URL = 'https://api.chorus-ai.co/v1'
+
+headers = {
+    'Authorization': f'Bearer {API_KEY}',
+    'Content-Type': 'application/json'
+}
+
+# List agents
+response = requests.get(f'{BASE_URL}/agents', headers=headers)
+agents = response.json()
+
+# Create agent
+response = requests.post(f'{BASE_URL}/agents', 
+    headers=headers,
+    json={
+        'name': 'Support Agent',
+        'systemPrompt': '...'
+    })
+agent = response.json()
+```
+
+### cURL
+
+```bash
+# Export your API key
+export CHORUS_API_KEY="chorus_xxx"
+
+# List agents
+curl "https://api.chorus-ai.co/v1/agents" \
+  -H "Authorization: Bearer $CHORUS_API_KEY"
+
+# Create agent
+curl -X POST "https://api.chorus-ai.co/v1/agents" \
+  -H "Authorization: Bearer $CHORUS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Support Agent",
+    "systemPrompt": "You are a helpful agent..."
+  }'
+```
+
+## OpenAPI Specification
+
+Download the full OpenAPI 3.0 specification:
+
+- [OpenAPI JSON](/openapi.json)
+
+Use this with tools like:
+- Swagger UI
+- Postman
+- Insomnia
+- OpenAPI Generator (for SDK generation)
+
+## Support
+
+Need help with the API?
+
+- **Documentation**: [docs.chorus-ai.co](https://docs.chorus-ai.co)
+- **Email**: support@chorus-ai.co
+- **Dashboard**: [app.chorus-ai.co](https://app.chorus-ai.co)
+
+## Next Steps
+
+- **[Quick Start Guide](/docs/guides/quickstart)** - Create your first agent in 5 minutes
+- **[Core Concepts](/docs/core-concepts/agents)** - Learn about agents, tools, and calls
+- **[Webhooks](/docs/guides/webhooks)** - Receive real-time notifications
+- **[Context Variables](/docs/guides/context-variables)** - Personalize conversations
+
