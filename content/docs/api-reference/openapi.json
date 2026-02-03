@@ -1696,6 +1696,122 @@
             }
           }
         }
+      },
+      "post": {
+        "summary": "Create an outbound call",
+        "description": "Initiate an outbound call using a configured phone number and agent. This endpoint queues the call and returns immediately with the call details.",
+        "operationId": "createCall",
+        "tags": ["Calls"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["agentId", "phoneNumberId", "to"],
+                "properties": {
+                  "agentId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The ID of the agent to use for this call"
+                  },
+                  "phoneNumberId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "The ID of the phone number to call from"
+                  },
+                  "to": {
+                    "type": "string",
+                    "description": "The destination phone number in E.164 format (e.g., +14155551234)"
+                  },
+                  "contextVariables": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "oneOf": [
+                        {"type": "string"},
+                        {"type": "number"},
+                        {"type": "boolean"}
+                      ]
+                    },
+                    "description": "Optional variables to use in the agent's system prompt and greeting template",
+                    "example": {
+                      "customerName": "John Doe",
+                      "accountNumber": "12345"
+                    }
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "Optional metadata to store with the call record"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Call created and queued successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Call"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Insufficient funds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Insufficient funds. Please top up your balance."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent or phone number not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Failed to initiate call",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/calls/{id}": {
