@@ -6,7 +6,7 @@ icon: Phone
 
 ## Introduction
 
-Calls are the core interaction in Kejue - phone conversations between your AI agents and real people. You can make outbound calls programmatically via the API, or receive inbound calls on your configured phone numbers.
+Calls are the core interaction in Chorus - phone conversations between your AI agents and real people. You can make outbound calls programmatically via the API, or receive inbound calls on your configured phone numbers.
 
 ## Call Types
 
@@ -26,8 +26,8 @@ Outbound calls are initiated by your application through the API. Common use cas
 Inbound calls are received on your configured phone numbers. When someone calls your number:
 
 1. The call arrives at your telephony provider
-2. Provider routes to Kejue via webhook
-3. Kejue assigns the configured agent
+2. Provider routes to Chorus via webhook
+3. Chorus assigns the configured agent
 4. Conversation begins automatically
 
 ## Making Outbound Calls
@@ -143,7 +143,7 @@ Open the `roomUrl` in your browser to test the conversation. This uses Daily.co 
 ```mermaid
 sequenceDiagram
     participant API as Your App
-    participant Platform as Kejue Platform
+    participant Platform as Chorus Platform
     participant Provider as Telephony Provider
     participant Phone as Customer Phone
     participant Agent as AI Agent Runtime
@@ -166,7 +166,7 @@ sequenceDiagram
 sequenceDiagram
     participant Phone as Caller
     participant Provider as Telephony Provider
-    participant Platform as Kejue Platform
+    participant Platform as Chorus Platform
     participant Agent as AI Agent Runtime
 
     Phone->>Provider: Dial number

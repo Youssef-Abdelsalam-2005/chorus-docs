@@ -1,6 +1,6 @@
 {
   "title": "API Reference",
-  "description": "Complete API reference for Kejue API",
+  "description": "Complete API reference for Chorus API",
   "root": true,
   "icon": "Webhook",
   "pages": ["---API Reference---", "index", "...(generated)"]

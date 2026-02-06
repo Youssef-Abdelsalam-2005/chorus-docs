@@ -24,7 +24,7 @@ export const metadata = createMetadata({
     template: "%s | Chorus API",
     default: "Chorus API",
   },
-  description: "Kejue API documentation",
+  description: "Chorus API documentation",
   metadataBase: baseUrl,
 });
 

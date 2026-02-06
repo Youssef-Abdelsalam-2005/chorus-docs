@@ -6,11 +6,11 @@ icon: Phone
 
 ## Introduction
 
-Phone numbers are the bridge between your agents and the phone network. Kejue supports multiple telephony providers, allowing you to use your existing numbers or provision new ones.
+Phone numbers are the bridge between your agents and the phone network. Chorus supports multiple telephony providers, allowing you to use your existing numbers or provision new ones.
 
 ## Supported Providers
 
-Kejue integrates with the following telephony providers:
+Chorus integrates with the following telephony providers:
 
 - **Twilio**: Industry-leading cloud communications platform
 - **SIP**: Standard SIP trunking for enterprise deployments
@@ -92,8 +92,8 @@ Each phone number can be assigned to a default agent. When an inbound call arriv
 When someone calls your phone number:
 
 1. Call arrives at your telephony provider (Twilio/SIP)
-2. Provider sends webhook to Kejue platform
-3. Kejue validates the number and organization
+2. Provider sends webhook to Chorus platform
+3. Chorus validates the number and organization
 4. Platform checks organization balance (if applicable)
 5. Assigned agent configuration is loaded
 6. WebSocket stream is established with the agent runtime

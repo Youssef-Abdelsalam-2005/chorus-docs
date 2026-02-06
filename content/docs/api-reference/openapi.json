@@ -1,11 +1,11 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Kejue Platform API",
+    "title": "Chorus Platform API",
     "description": "Public REST API for managing voice AI agents, phone numbers, tools, and calls",
     "version": "1.0.0",
     "contact": {
-      "name": "Kejue AI",
+      "name": "Chorus",
       "url": "https://chorus-ai.co"
     }
   },
@@ -340,6 +340,12 @@
             "type": "string",
             "enum": ["twilio", "sip", "voximplant"]
           },
+          "sipMode": {
+            "type": "string",
+            "enum": ["registration", "ip_allowlist"],
+            "nullable": true,
+            "description": "SIP trunk mode: 'registration' for username/password auth, 'ip_allowlist' for IP-based allowlisting"
+          },
           "agentId": {
             "type": "string",
             "format": "uuid",
@@ -370,6 +376,12 @@
             "enum": ["twilio", "sip", "voximplant", "jambonz"],
             "default": "twilio"
           },
+          "sipMode": {
+            "type": "string",
+            "enum": ["registration", "ip_allowlist"],
+            "default": "registration",
+            "description": "SIP trunk mode. Use 'registration' for username/password auth, 'ip_allowlist' for IP-based allowlisting. Only applicable when provider is 'sip'."
+          },
           "agentId": {
             "type": "string",
             "format": "uuid",
@@ -386,16 +398,16 @@
           "sipUsername": {
             "type": "string",
             "maxLength": 60,
-            "description": "Required if provider is 'sip'"
+            "description": "Required if provider is 'sip' and sipMode is 'registration'"
           },
           "sipPassword": {
             "type": "string",
-            "description": "Required if provider is 'sip'"
+            "description": "Required if provider is 'sip' and sipMode is 'registration'"
           },
           "sipProxy": {
             "type": "string",
             "maxLength": 100,
-            "description": "Required if provider is 'sip'"
+            "description": "Required if provider is 'sip' and sipMode is 'registration'"
           },
           "sipOutboundProxy": {
             "type": "string",
@@ -406,6 +418,24 @@
             "type": "string",
             "maxLength": 60,
             "nullable": true
+          },
+          "sipIp": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "IP address or hostname of SIP server. Required if provider is 'sip' and sipMode is 'ip_allowlist'."
+          },
+          "sipPort": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535,
+            "default": 5060,
+            "description": "SIP port number. Used when sipMode is 'ip_allowlist'."
+          },
+          "sipProtocol": {
+            "type": "string",
+            "enum": ["udp", "tcp", "tls"],
+            "default": "udp",
+            "description": "SIP transport protocol. Used when sipMode is 'ip_allowlist'."
           },
           "metadata": {
             "type": "object",
@@ -425,6 +455,10 @@
           "provider": {
             "type": "string",
             "enum": ["twilio", "sip", "voximplant", "jambonz"]
+          },
+          "sipMode": {
+            "type": "string",
+            "enum": ["registration", "ip_allowlist"]
           },
           "agentId": {
             "type": "string",
@@ -457,6 +491,19 @@
             "type": "string",
             "maxLength": 60,
             "nullable": true
+          },
+          "sipIp": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "sipPort": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "sipProtocol": {
+            "type": "string",
+            "enum": ["udp", "tcp", "tls"]
           },
           "metadata": {
             "type": "object",

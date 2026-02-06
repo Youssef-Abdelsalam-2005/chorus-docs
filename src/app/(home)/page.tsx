@@ -8,23 +8,23 @@ export default function DocsPage(): ReactElement {
   return (
     <main className="container flex max-w-[1300px] flex-col py-16">
       <h1 className="font-semibold text-2xl md:text-3xl">
-        Welcome to the Kejue API
+        Welcome to the Chorus API
       </h1>
       <p className="mt-1 text-fd-muted-foreground text-lg">
-        Get started with Kejue API.
+        Get started with Chorus API.
       </p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 text-left md:grid-cols-2">
         <DocumentationItem
           title="Documentation"
-          description="Get started with the Kejue API."
+          description="Get started with the Chorus API."
           icon={{ icon: BookIcon, id: "(index)" }}
           href="/docs"
         />
 
         <DocumentationItem
           title="API Reference"
-          description="Get started with Kejue API's reference feature."
+          description="Get started with Chorus API's reference feature."
           icon={{ icon: WebhookIcon, id: "api-reference" }}
           href="/docs/api-reference"
         />
