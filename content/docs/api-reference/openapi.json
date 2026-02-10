@@ -1,11 +1,11 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Chorus Platform API",
+    "title": "Kejue Platform API",
     "description": "Public REST API for managing voice AI agents, phone numbers, tools, and calls",
     "version": "1.0.0",
     "contact": {
-      "name": "Chorus",
+      "name": "Kejue AI",
       "url": "https://chorus-ai.co"
     }
   },
@@ -13,10 +13,6 @@
     {
       "url": "https://api.chorus-ai.co/v1",
       "description": "Production server"
-    },
-    {
-      "url": "http://localhost:3001/v1",
-      "description": "Development server"
     }
   ],
   "security": [
@@ -127,6 +123,12 @@
             "maximum": 3600,
             "default": 600
           },
+          "knowledgeSearchInstructions": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true,
+            "description": "Custom instructions for when the agent should search its knowledge base"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -231,6 +233,12 @@
             "type": "string",
             "maxLength": 10,
             "nullable": true
+          },
+          "knowledgeSearchInstructions": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true,
+            "description": "Custom instructions for when the agent should search its knowledge base"
           }
         }
       },
@@ -319,6 +327,12 @@
             "type": "string",
             "maxLength": 10,
             "nullable": true
+          },
+          "knowledgeSearchInstructions": {
+            "type": "string",
+            "maxLength": 2000,
+            "nullable": true,
+            "description": "Custom instructions for when the agent should search its knowledge base"
           }
         }
       },
@@ -874,6 +888,132 @@
                 "type": "integer"
               }
             }
+          }
+        }
+      },
+      "KnowledgeDocument": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "agentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the agent this document belongs to"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the document"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Original filename"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type of the document"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "Size of the file in bytes"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "processing", "completed", "failed"],
+            "description": "Processing status of the document"
+          },
+          "chunkCount": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of chunks after processing"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "KnowledgeSearchRequest": {
+        "type": "object",
+        "required": ["agentId", "query"],
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the agent whose knowledge to search"
+          },
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "topK": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 5,
+            "description": "Number of results to return"
+          }
+        }
+      },
+      "KnowledgeSearchResult": {
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "content": {
+                  "type": "string",
+                  "description": "Text content of the matching chunk"
+                },
+                "document": {
+                  "type": "string",
+                  "description": "Name of the source document"
+                },
+                "score": {
+                  "type": "number",
+                  "description": "Relevance score"
+                }
+              }
+            }
+          }
+        }
+      },
+      "UploadKnowledgeRequest": {
+        "type": "object",
+        "required": ["agentId", "name", "filename", "mimeType", "fileSize", "fileBase64"],
+        "properties": {
+          "agentId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the agent to associate this document with"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name for the document"
+          },
+          "filename": {
+            "type": "string",
+            "description": "Original filename"
+          },
+          "mimeType": {
+            "type": "string",
+            "description": "MIME type (e.g., application/pdf, text/plain)"
+          },
+          "fileSize": {
+            "type": "integer",
+            "description": "Size of the file in bytes"
+          },
+          "fileBase64": {
+            "type": "string",
+            "description": "Base64-encoded file content"
           }
         }
       },
@@ -2115,12 +2255,326 @@
           }
         }
       }
+    },
+    "/knowledge": {
+      "get": {
+        "summary": "List knowledge documents",
+        "description": "Retrieve a list of all knowledge documents for an agent",
+        "operationId": "listKnowledgeDocuments",
+        "tags": ["Knowledge"],
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "query",
+            "required": true,
+            "description": "ID of the agent to list documents for",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/KnowledgeDocument"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing agentId parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload knowledge document",
+        "description": "Upload a new knowledge document for an agent. Requires knowledgeSearchInstructions to be configured on the agent.",
+        "operationId": "uploadKnowledgeDocument",
+        "tags": ["Knowledge"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadKnowledgeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Document uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/KnowledgeDocument"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields or knowledge search instructions not configured",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge/{id}": {
+      "get": {
+        "summary": "Get knowledge document",
+        "description": "Retrieve a specific knowledge document by ID",
+        "operationId": "getKnowledgeDocument",
+        "tags": ["Knowledge"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Document ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/KnowledgeDocument"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Document not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete knowledge document",
+        "description": "Delete a knowledge document",
+        "operationId": "deleteKnowledgeDocument",
+        "tags": ["Knowledge"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Document ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Document deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Document not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge/{id}/status": {
+      "get": {
+        "summary": "Get document processing status",
+        "description": "Check the processing status of a knowledge document",
+        "operationId": "getKnowledgeDocumentStatus",
+        "tags": ["Knowledge"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Document ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["pending", "processing", "completed", "failed"]
+                        },
+                        "chunkCount": {
+                          "type": "integer",
+                          "nullable": true
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Document not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/knowledge/search": {
+      "post": {
+        "summary": "Search knowledge",
+        "description": "Search the knowledge base for relevant information",
+        "operationId": "searchKnowledge",
+        "tags": ["Knowledge"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowledgeSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowledgeSearchResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent has no knowledge collection",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "tags": [
     {
       "name": "Agents",
       "description": "Manage voice AI agents"
+    },
+    {
+      "name": "Knowledge",
+      "description": "Manage knowledge base documents for agents"
     },
     {
       "name": "Phone Numbers",
