@@ -13,6 +13,10 @@
     {
       "url": "https://api.chorus-ai.co/v1",
       "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3001/v1",
+      "description": "Development server"
     }
   ],
   "security": [
@@ -129,6 +133,19 @@
             "nullable": true,
             "description": "Custom instructions for when the agent should search its knowledge base"
           },
+          "backgroundSoundId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "ID of the background sound to play during calls"
+          },
+          "backgroundSoundVolume": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.15,
+            "description": "Volume of the background sound (0.0 to 1.0)"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -239,6 +256,19 @@
             "maxLength": 2000,
             "nullable": true,
             "description": "Custom instructions for when the agent should search its knowledge base"
+          },
+          "backgroundSoundId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "ID of the background sound to play during calls"
+          },
+          "backgroundSoundVolume": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.15,
+            "description": "Volume of the background sound (0.0 to 1.0)"
           }
         }
       },
@@ -1014,6 +1044,40 @@
           "fileBase64": {
             "type": "string",
             "description": "Base64-encoded file content"
+          }
+        }
+      },
+      "BackgroundSound": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSystemPreset": {
+            "type": "boolean",
+            "description": "Whether this is a system-wide preset sound"
+          },
+          "fileSize": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Size of the audio file in bytes"
+          },
+          "durationSeconds": {
+            "type": "number",
+            "nullable": true,
+            "description": "Duration of the audio in seconds"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -2565,6 +2629,44 @@
           }
         }
       }
+    },
+    "/background-sounds": {
+      "get": {
+        "summary": "List background sounds",
+        "description": "Retrieve a list of all available background sounds (system presets and organization-specific)",
+        "operationId": "listBackgroundSounds",
+        "tags": ["Background Sounds"],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BackgroundSound"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "tags": [
@@ -2595,6 +2697,10 @@
     {
       "name": "SLM Models",
       "description": "Browse available Small Language Models"
+    },
+    {
+      "name": "Background Sounds",
+      "description": "Browse available background sounds for calls"
     }
   ]
 }
