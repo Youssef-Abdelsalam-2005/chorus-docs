@@ -6,7 +6,6 @@
     "quickstart",
     "context-variables",
     "webhooks",
-    "twilio-numbers",
     "sip-numbers"
   ]
 }
