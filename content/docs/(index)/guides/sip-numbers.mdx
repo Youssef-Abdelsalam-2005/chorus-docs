@@ -1,12 +1,12 @@
 ---
 title: SIP Numbers
-description: Connect SIP trunks to Chorus via Somleng using IP allowlisting or registration
+description: Connect SIP trunks to Chorus using IP allowlisting or registration
 icon: Phone
 ---
 
 ## Overview
 
-Chorus supports SIP trunking through [Somleng](https://www.somleng.org), giving you two connection modes: **IP Allowlist** and **Registration**. Choose the mode that fits your PBX/SBC setup.
+Chorus supports SIP trunking, giving you two connection modes: **IP Allowlist** and **Registration**. Choose the mode that fits your PBX/SBC setup.
 
 ## IP Allowlist Mode
 
@@ -14,11 +14,11 @@ Use IP allowlisting when your PBX has a static IP address and you want a simple,
 
 ### Step 1: Configure Your SIP Trunk
 
-On your PBX/SBC, configure a SIP trunk pointing to Somleng's SIP endpoint for your region.
+On your PBX/SBC, configure a SIP trunk pointing to our SIP server for your region.
 
-### Step 2: Allowlist Somleng's IPs
+### Step 2: Allowlist our SIP sever's IPs
 
-Allowlist Somleng's IP addresses on your PBX for outbound calls. This allows Somleng to send SIP INVITEs to your PBX.
+Allowlist our SIP server's IP addresses on your PBX for outbound calls. This allows our SIP server to send SIP INVITEs to your PBX.
 
 ### Step 3: Add the Number in Chorus
 
@@ -28,7 +28,7 @@ In your Chorus dashboard, add the number with mode **IP Allowlist** and enter:
 - **PBX IP address** — the public IP of your PBX/SBC
 - **Port** — the SIP port (default `5060`)
 
-The platform automatically creates a SIP trunk on Somleng with your IP allowlisted and registers the number for inbound webhooks. No further configuration is needed.
+The platform automatically creates a SIP trunk on our SIP server with your IP allowlisted and registers the number for inbound webhooks. No further configuration is needed.
 
 ## Registration Mode
 
@@ -52,7 +52,7 @@ In your Chorus dashboard, add the number with mode **Registration** and enter:
 | Outbound Proxy | No | Proxy address if SIP traffic needs to route through a proxy instead of directly to the host |
 | Auth User | No | Digest auth username, if it differs from the SIP username |
 
-Somleng will actively register (`SIP REGISTER`) to your PBX using the provided credentials. Once registered, inbound and outbound calls flow through the trunk automatically.
+Our SIP server will actively register (`SIP REGISTER`) to your PBX using the provided credentials. Once registered, inbound and outbound calls flow through the trunk automatically.
 
 ## Next Steps
 

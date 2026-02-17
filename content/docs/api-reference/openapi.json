@@ -603,8 +603,8 @@
           },
           "provider": {
             "type": "string",
-            "enum": ["twilio", "sip", "voximplant"],
-            "description": "Provider type. 'sip' covers both Jambonz and Somleng backends (determined by server config)."
+            "enum": ["twilio", "sip"],
+            "description": "Provider type"
           },
           "sipMode": {
             "type": "string",
@@ -673,7 +673,7 @@
           "sipProxy": {
             "type": "string",
             "maxLength": 100,
-            "description": "SIP registrar host (e.g. 'pbx.example.com'). Required if provider is 'sip' and sipMode is 'registration'. In registration mode, this is the host Somleng registers TO."
+            "description": "SIP registrar host (e.g. 'pbx.example.com'). Required if provider is 'sip' and sipMode is 'registration'. In registration mode, this is the host our SIP server registers TO."
           },
           "sipOutboundProxy": {
             "type": "string",
@@ -749,7 +749,7 @@
           "sipProxy": {
             "type": "string",
             "maxLength": 100,
-            "description": "SIP registrar host. In registration mode, this is the host Somleng registers TO."
+            "description": "SIP registrar host. In registration mode, this is the host our SIP server registers TO."
           },
           "sipOutboundProxy": {
             "type": "string",
@@ -1716,7 +1716,7 @@
       },
       "post": {
         "summary": "Create a new phone number",
-        "description": "Register a new phone number. For Twilio, provide account credentials. For SIP, choose between 'registration' mode (Somleng registers TO your PBX) or 'ip_allowlist' mode (your PBX IP is allowlisted). SIP numbers support outbound proxy and auth user options in registration mode.",
+        "description": "Register a new phone number. For Twilio, provide account credentials. For SIP, choose between 'registration' mode (our SIP server registers TO your PBX) or 'ip_allowlist' mode (your PBX IP is allowlisted). SIP numbers support outbound proxy and auth user options in registration mode.",
         "operationId": "createPhoneNumber",
         "tags": ["Phone Numbers"],
         "requestBody": {
