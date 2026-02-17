@@ -1,0 +1,63 @@
+---
+title: Twilio Numbers
+description: Set up Twilio phone numbers for use with Chorus
+icon: Phone
+---
+
+## Overview
+
+This guide walks you through connecting a Twilio phone number to Chorus so your agents can make and receive calls.
+
+## Prerequisites
+
+- A [Twilio account](https://console.twilio.com) with a purchased phone number
+- Your Twilio **Account SID** and **Auth Token** (found in the Twilio console dashboard)
+- A Chorus account with API access
+
+## Step 1: Buy a Phone Number
+
+Purchase a phone number from the [Twilio console](https://console.twilio.com). Choose a number with voice capabilities in your desired region.
+
+## Step 2: Configure the Voice Webhook
+
+In the Twilio console, navigate to your phone number's configuration and set the **Voice webhook URL** to:
+
+```
+https://<your-api-domain>/twilio/answer
+```
+
+- **Method**: `POST`
+
+This tells Twilio to forward incoming calls to Chorus for handling.
+
+## Step 3: Add the Number in Chorus
+
+In your Chorus dashboard, add the number with the **Twilio** provider. You'll need to enter:
+
+- **Phone number** — the Twilio number you purchased (E.164 format, e.g. `+15551234567`)
+- **Account SID** — your Twilio Account SID (starts with `AC`)
+- **Auth Token** — your Twilio Auth Token
+
+You can also add the number via the API:
+
+```bash
+curl -X POST https://api.chorus-ai.co/v1/phone-numbers \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Twilio Number",
+    "number": "+15551234567",
+    "provider": "twilio",
+    "agentId": "YOUR_AGENT_ID",
+    "twilioAccountSid": "ACxxxxxxxxxxxxx",
+    "twilioAuthToken": "your-auth-token"
+  }'
+```
+
+Once configured, your agent can receive inbound calls on this number and make outbound calls through it.
+
+## Next Steps
+
+- Learn about [SIP numbers](/docs/guides/sip-numbers) for enterprise deployments
+- Set up an [Agent](/docs/core-concepts/agents) to handle calls
+- Configure [Webhooks](/docs/guides/webhooks) to receive post-call data

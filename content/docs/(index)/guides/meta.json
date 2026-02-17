@@ -5,6 +5,8 @@
   "pages": [
     "quickstart",
     "context-variables",
-    "webhooks"
+    "webhooks",
+    "twilio-numbers",
+    "sip-numbers"
   ]
 }

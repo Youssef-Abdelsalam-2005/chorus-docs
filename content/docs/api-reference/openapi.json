@@ -66,10 +66,68 @@
             "maximum": 1.5,
             "default": 1.0
           },
-          "settings": {
-            "type": "object",
-            "additionalProperties": true,
-            "nullable": true
+          "voiceStability": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "default": 0.5,
+            "description": "Voice stability setting (ElevenLabs/Faseeh only)"
+          },
+          "turnEndpointDelay": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 2000,
+            "nullable": true,
+            "description": "Silence duration in ms before the agent responds (default: 100)"
+          },
+          "minTurnDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000,
+            "nullable": true,
+            "description": "Minimum speech duration in ms to count as a valid turn (default: 50)"
+          },
+          "minInterruptionDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000,
+            "nullable": true,
+            "description": "How long in ms the user must speak to interrupt the agent (default: 100)"
+          },
+          "frameActivationThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "nullable": true,
+            "description": "VAD probability threshold for speech detection (default: 0.35)"
+          },
+          "postSpeechCooldown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000,
+            "nullable": true,
+            "description": "Echo guard timeout in ms after agent stops speaking (default: 400)"
+          },
+          "ultravadEotThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "nullable": true,
+            "description": "End-of-turn probability threshold (default: 0.1)"
+          },
+          "speculativeSilenceMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000,
+            "nullable": true,
+            "description": "How quickly in ms to start speculative inference on silence (default: 150)"
+          },
+          "fallbackSilenceMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "nullable": true,
+            "description": "Fallback timeout in ms if endpointing fails (default: 3000)"
           },
           "isActive": {
             "type": "boolean",
@@ -107,6 +165,11 @@
             "format": "uri",
             "nullable": true
           },
+          "postCallWebhookSecret": {
+            "type": "string",
+            "nullable": true,
+            "description": "Secret used to sign webhook payloads"
+          },
           "firstSpeaker": {
             "type": "string",
             "enum": ["user", "agent"],
@@ -121,11 +184,27 @@
             "type": "boolean",
             "nullable": true
           },
+          "firstMessageUninterruptible": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the agent's first message cannot be interrupted by the user"
+          },
+          "firstMessageDelay": {
+            "type": "number",
+            "default": 0,
+            "description": "Seconds to wait before the agent sends its first message"
+          },
           "maxCallDurationSeconds": {
             "type": "integer",
             "minimum": 30,
             "maximum": 3600,
             "default": 600
+          },
+          "languageHint": {
+            "type": "string",
+            "maxLength": 10,
+            "nullable": true,
+            "description": "ISO 639-1 language code hint for transcription (e.g., 'ar', 'en')"
           },
           "knowledgeSearchInstructions": {
             "type": "string",
@@ -185,9 +264,68 @@
             "maximum": 1.5,
             "default": 1.0
           },
-          "settings": {
-            "type": "object",
-            "additionalProperties": true
+          "voiceStability": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "default": 0.5,
+            "description": "Voice stability setting (ElevenLabs/Faseeh only)"
+          },
+          "turnEndpointDelay": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 2000,
+            "nullable": true,
+            "description": "Silence duration in ms before the agent responds (default: 100)"
+          },
+          "minTurnDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000,
+            "nullable": true,
+            "description": "Minimum speech duration in ms to count as a valid turn (default: 50)"
+          },
+          "minInterruptionDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000,
+            "nullable": true,
+            "description": "How long in ms the user must speak to interrupt the agent (default: 100)"
+          },
+          "frameActivationThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "nullable": true,
+            "description": "VAD probability threshold for speech detection (default: 0.35)"
+          },
+          "postSpeechCooldown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000,
+            "nullable": true,
+            "description": "Echo guard timeout in ms after agent stops speaking (default: 400)"
+          },
+          "ultravadEotThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "nullable": true,
+            "description": "End-of-turn probability threshold (default: 0.1)"
+          },
+          "speculativeSilenceMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000,
+            "nullable": true,
+            "description": "How quickly in ms to start speculative inference on silence (default: 150)"
+          },
+          "fallbackSilenceMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "nullable": true,
+            "description": "Fallback timeout in ms if endpointing fails (default: 3000)"
           },
           "allowEndCall": {
             "type": "boolean",
@@ -240,6 +378,20 @@
             "maxLength": 1000,
             "nullable": true
           },
+          "agentGreetingEnabled": {
+            "type": "boolean",
+            "default": false
+          },
+          "firstMessageUninterruptible": {
+            "type": "boolean",
+            "default": false,
+            "description": "Whether the agent's first message cannot be interrupted by the user"
+          },
+          "firstMessageDelay": {
+            "type": "number",
+            "default": 0,
+            "description": "Seconds to wait before the agent sends its first message"
+          },
           "maxCallDurationSeconds": {
             "type": "integer",
             "minimum": 30,
@@ -249,7 +401,8 @@
           "languageHint": {
             "type": "string",
             "maxLength": 10,
-            "nullable": true
+            "nullable": true,
+            "description": "ISO 639-1 language code hint for transcription (e.g., 'ar', 'en')"
           },
           "knowledgeSearchInstructions": {
             "type": "string",
@@ -299,9 +452,58 @@
             "minimum": 0.6,
             "maximum": 1.5
           },
-          "settings": {
-            "type": "object",
-            "additionalProperties": true
+          "voiceStability": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0
+          },
+          "turnEndpointDelay": {
+            "type": "integer",
+            "minimum": 50,
+            "maximum": 2000,
+            "nullable": true
+          },
+          "minTurnDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000,
+            "nullable": true
+          },
+          "minInterruptionDuration": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2000,
+            "nullable": true
+          },
+          "frameActivationThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "nullable": true
+          },
+          "postSpeechCooldown": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000,
+            "nullable": true
+          },
+          "ultravadEotThreshold": {
+            "type": "number",
+            "minimum": 0.0,
+            "maximum": 1.0,
+            "nullable": true
+          },
+          "speculativeSilenceMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 5000,
+            "nullable": true
+          },
+          "fallbackSilenceMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "nullable": true
           },
           "allowEndCall": {
             "type": "boolean"
@@ -348,6 +550,15 @@
             "maxLength": 1000,
             "nullable": true
           },
+          "agentGreetingEnabled": {
+            "type": "boolean"
+          },
+          "firstMessageUninterruptible": {
+            "type": "boolean"
+          },
+          "firstMessageDelay": {
+            "type": "number"
+          },
           "maxCallDurationSeconds": {
             "type": "integer",
             "minimum": 30,
@@ -363,6 +574,16 @@
             "maxLength": 2000,
             "nullable": true,
             "description": "Custom instructions for when the agent should search its knowledge base"
+          },
+          "backgroundSoundId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "backgroundSoundVolume": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
           }
         }
       },
@@ -382,7 +603,8 @@
           },
           "provider": {
             "type": "string",
-            "enum": ["twilio", "sip", "voximplant"]
+            "enum": ["twilio", "sip", "voximplant"],
+            "description": "Provider type. 'sip' covers both Jambonz and Somleng backends (determined by server config)."
           },
           "sipMode": {
             "type": "string",
@@ -451,29 +673,31 @@
           "sipProxy": {
             "type": "string",
             "maxLength": 100,
-            "description": "Required if provider is 'sip' and sipMode is 'registration'"
+            "description": "SIP registrar host (e.g. 'pbx.example.com'). Required if provider is 'sip' and sipMode is 'registration'. In registration mode, this is the host Somleng registers TO."
           },
           "sipOutboundProxy": {
             "type": "string",
             "maxLength": 100,
-            "nullable": true
+            "nullable": true,
+            "description": "Optional SIP outbound proxy. Used when SIP traffic needs to route through a proxy instead of directly to the host. Only used in registration mode."
           },
           "sipAuthUser": {
             "type": "string",
             "maxLength": 60,
-            "nullable": true
+            "nullable": true,
+            "description": "Optional SIP authentication username, if different from sipUsername. Only used in registration mode."
           },
           "sipIp": {
             "type": "string",
             "maxLength": 255,
-            "description": "IP address or hostname of SIP server. Required if provider is 'sip' and sipMode is 'ip_allowlist'."
+            "description": "IP address of your PBX/SBC. Required if provider is 'sip' and sipMode is 'ip_allowlist'."
           },
           "sipPort": {
             "type": "integer",
             "minimum": 1,
             "maximum": 65535,
             "default": 5060,
-            "description": "SIP port number. Used when sipMode is 'ip_allowlist'."
+            "description": "SIP port number. Used in both 'registration' and 'ip_allowlist' modes."
           },
           "sipProtocol": {
             "type": "string",
@@ -524,26 +748,31 @@
           },
           "sipProxy": {
             "type": "string",
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "SIP registrar host. In registration mode, this is the host Somleng registers TO."
           },
           "sipOutboundProxy": {
             "type": "string",
             "maxLength": 100,
-            "nullable": true
+            "nullable": true,
+            "description": "Optional SIP outbound proxy for registration mode."
           },
           "sipAuthUser": {
             "type": "string",
             "maxLength": 60,
-            "nullable": true
+            "nullable": true,
+            "description": "Optional SIP auth username if different from sipUsername."
           },
           "sipIp": {
             "type": "string",
-            "maxLength": 255
+            "maxLength": 255,
+            "description": "IP address of your PBX/SBC (ip_allowlist mode)."
           },
           "sipPort": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 65535
+            "maximum": 65535,
+            "description": "SIP port number. Used in both registration and ip_allowlist modes."
           },
           "sipProtocol": {
             "type": "string",
@@ -827,22 +1056,57 @@
             "type": "integer",
             "nullable": true
           },
+          "cost": {
+            "type": "number",
+            "nullable": true,
+            "description": "Cost of the call in USD"
+          },
           "recordingUrl": {
             "type": "string",
             "nullable": true
           },
-          "transcriptUrl": {
-            "type": "string",
-            "nullable": true
+          "turnCount": {
+            "type": "integer",
+            "nullable": true,
+            "description": "Number of conversation turns"
           },
-          "summaryUrl": {
-            "type": "string",
-            "nullable": true
+          "transcript": {
+            "type": "array",
+            "nullable": true,
+            "description": "Full conversation transcript. Only included in single-call detail responses (GET /calls/{id}), not in list responses.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "assistant", "system"]
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            }
           },
-          "extractedData": {
+          "analysis": {
             "type": "object",
-            "additionalProperties": true,
-            "nullable": true
+            "nullable": true,
+            "description": "Post-call analysis including summary and extracted data. Only included in single-call detail responses (GET /calls/{id}), not in list responses.",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "nullable": true
+              },
+              "extractions": {
+                "type": "object",
+                "additionalProperties": true,
+                "nullable": true
+              }
+            }
+          },
+          "endedReason": {
+            "type": "string",
+            "nullable": true,
+            "description": "Reason the call ended"
           },
           "contextVariables": {
             "type": "object",
@@ -865,10 +1129,6 @@
             "nullable": true
           },
           "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
             "type": "string",
             "format": "date-time"
           }
@@ -1456,7 +1716,7 @@
       },
       "post": {
         "summary": "Create a new phone number",
-        "description": "Register a new phone number with Twilio, SIP, or Voximplant credentials",
+        "description": "Register a new phone number. For Twilio, provide account credentials. For SIP, choose between 'registration' mode (Somleng registers TO your PBX) or 'ip_allowlist' mode (your PBX IP is allowlisted). SIP numbers support outbound proxy and auth user options in registration mode.",
         "operationId": "createPhoneNumber",
         "tags": ["Phone Numbers"],
         "requestBody": {
