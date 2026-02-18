@@ -221,7 +221,7 @@ if __name__ == '__main__':
 ```php
 <?php
 $payload = file_get_contents('php://input');
-$signature = $_SERVER['HTTP_X_KEJUE_SIGNATURE'];
+$signature = $_SERVER['HTTP_X_CHORUS_SIGNATURE'];
 $secret = getenv('WEBHOOK_SECRET');
 
 // Verify signature

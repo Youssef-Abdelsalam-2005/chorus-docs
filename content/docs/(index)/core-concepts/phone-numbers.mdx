@@ -13,15 +13,16 @@ Phone numbers are the bridge between your agents and the phone network. Chorus s
 Chorus integrates with the following telephony providers:
 
 - **Twilio**: Industry-leading cloud communications platform
-- **SIP**: Standard SIP trunking for enterprise deployments
+- **SIP**: Standard SIP trunking for enterprise deployments (supports registration and IP allowlist modes)
+- **Voximplant**: Cloud communications platform
 
 ## Provider Comparison
 
-| Feature | Twilio | SIP |
-|---------|--------|-------------|
-| Global Coverage | ✅ Excellent | ✅ Depends on trunk |
-| Setup Complexity | ⭐ Easy | ⭐⭐ Moderate |
-| Use Case | Quick setup | Enterprise |
+| Feature | Twilio | SIP | Voximplant |
+|---------|--------|-------------|-----------|
+| Global Coverage | ✅ Excellent | ✅ Depends on trunk | ✅ Good |
+| Setup Complexity | ⭐ Easy | ⭐⭐ Moderate | ⭐ Easy |
+| Use Case | Quick setup | Enterprise | Cloud PBX |
 
 ## Adding a Phone Number
 
@@ -52,30 +53,63 @@ Credentials are encrypted and stored securely. Your Auth Token is never exposed 
 
 ### SIP
 
-For SIP trunk configuration:
+SIP numbers support two modes via the `sipMode` field:
+
+#### Registration Mode (`sipMode: "registration"`)
+
+Our SIP server registers to your PBX using credentials:
 
 ```json
 {
   "name": "Enterprise Trunk",
   "number": "+15551234567",
   "provider": "sip",
+  "sipMode": "registration",
   "agentId": "agent-uuid",
   "sipUsername": "your-username",
   "sipPassword": "your-password",
   "sipProxy": "sip.your-provider.com",
+  "sipPort": 5060,
   "sipOutboundProxy": "outbound.your-provider.com",
   "sipAuthUser": "auth-username"
 }
 ```
 
-Required fields for SIP:
-- `sipUsername`: SIP authentication username
-- `sipPassword`: SIP authentication password  
-- `sipProxy`: SIP server address
+Required fields for registration mode:
+- `sipUsername`: SIP authentication username (max 60 characters)
+- `sipPassword`: SIP authentication password
+- `sipProxy`: SIP registrar host (e.g., `pbx.example.com`)
 
 Optional fields:
-- `sipOutboundProxy`: Separate outbound proxy if needed
-- `sipAuthUser`: Alternative auth username
+- `sipPort`: SIP port (default: `5060`)
+- `sipOutboundProxy`: Proxy address if SIP traffic needs to route through a proxy
+- `sipAuthUser`: Digest auth username, if different from `sipUsername`
+
+#### IP Allowlist Mode (`sipMode: "ip_allowlist"`)
+
+Your PBX connects directly using IP-based allowlisting:
+
+```json
+{
+  "name": "Enterprise Trunk",
+  "number": "+15551234567",
+  "provider": "sip",
+  "sipMode": "ip_allowlist",
+  "agentId": "agent-uuid",
+  "sipIp": "203.0.113.10",
+  "sipPort": 5060,
+  "sipProtocol": "udp"
+}
+```
+
+Required fields for IP allowlist mode:
+- `sipIp`: Public IP address of your PBX/SBC
+
+Optional fields:
+- `sipPort`: SIP port (default: `5060`)
+- `sipProtocol`: Transport protocol - `"udp"`, `"tcp"`, or `"tls"` (default: `"udp"`)
+
+See the [SIP Numbers guide](/docs/guides/sip-numbers) for detailed setup instructions.
 
 ## Assigning Agents
 
@@ -99,12 +133,25 @@ When someone calls your phone number:
 6. WebSocket stream is established with the agent runtime
 7. Conversation begins
 
+## Additional Fields
+
+Phone numbers also support a `metadata` field for storing arbitrary data:
+
+```json
+{
+  "metadata": {
+    "department": "support",
+    "region": "us-east"
+  }
+}
+```
+
 ## Outbound Calls
 
 Use phone numbers to make outbound calls via the API:
 
 ```json
-POST /api/calls/outbound
+POST /v1/calls
 {
   "agentId": "agent-uuid",
   "phoneNumberId": "phone-uuid",
@@ -118,81 +165,7 @@ POST /api/calls/outbound
 
 The call will be placed from the specified phone number using its configured provider.
 
-## Webhook Configuration
 
-After adding a phone number, you'll need to configure webhooks with your provider:
-
-### Twilio Webhook URLs
-
-Configure these in your Twilio phone number settings:
-
-**Voice URL (Incoming calls):**
-```
-https://api.chorus-ai.co/twilio/answer
-```
-
-**Method:** POST
-
-### SIP Configuration
-
-For Jambonz application settings:
-
-**Call Webhook:**
-```
-https://api.chorus-ai.co/jambonz/webhook
-```
-
-**Call Status Webhook:**
-```
-https://api.chorus-ai.co/api/jambonz/status
-```
-
-## Security
-
-All credentials (Twilio Auth Tokens, SIP passwords) are:
-- Encrypted at rest using AES-256
-- Never returned in API responses
-- Stored securely in the database
-- Only decrypted during call initiation
-
-## Testing
-
-Test your phone number configuration:
-
-1. Call your phone number from any phone
-2. Verify the agent answers and can converse
-3. Check call logs in the dashboard
-
-For outbound testing, use the "Make Test Call" feature in the dashboard.
-
-## Troubleshooting
-
-### Calls Not Connecting
-
-**Check:**
-- Webhook URLs are correctly configured in your provider
-- Phone number is active in your provider account
-- Agent is assigned and active
-- Organization has sufficient balance
-
-### One-Way Audio
-
-**Possible causes:**
-- NAT/Firewall issues (SIP providers)
-- Incorrect SIP proxy configuration
-- Network connectivity problems
-
-**Solution:**
-- Verify SIP settings
-- Check outbound proxy configuration
-- Test from different network
-
-### Authentication Errors
-
-**Check:**
-- Twilio Account SID and Auth Token are correct
-- SIP credentials match your trunk configuration
-- Credentials haven't expired or been rotated
 
 ## API Reference
 

@@ -31,7 +31,7 @@ An **Agent** is a configurable voice AI assistant that:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `systemPrompt` | string | Instructions that guide the agent's behavior (max 12,000 characters) |
+| `systemPrompt` | string | Instructions that guide the agent's behavior (max 32,000 characters) |
 | `slmModelId` | UUID | The language model to use for the agent |
 | `voiceId` | UUID | The voice to use for speech synthesis |
 | `voiceSpeed` | number | Voice speed multiplier (0.6 - 1.5, default: 1.0) |
@@ -41,7 +41,13 @@ An **Agent** is a configurable voice AI assistant that:
 | `agentGreeting` | string | Custom greeting message (max 1,000 characters) |
 | `agentGreetingEnabled` | boolean | Whether to use a custom greeting |
 | `maxCallDurationSeconds` | integer | Maximum call duration in seconds (30-3600, default: 600) |
+| `voiceStability` | number | Voice stability setting, 0.0-1.0 (ElevenLabs/Faseeh only, default: 0.5) |
+| `firstMessageUninterruptible` | boolean | Whether the agent's first message cannot be interrupted |
+| `firstMessageDelay` | number | Seconds to wait before the agent sends its first message (default: 0) |
 | `languageHint` | string | ISO 639-1 language code for transcription (e.g., "en", "ar") |
+| `knowledgeSearchInstructions` | string | Custom instructions for when the agent should search its knowledge base (max 2,000 characters) |
+| `backgroundSoundId` | UUID | ID of the background sound to play during calls |
+| `backgroundSoundVolume` | number | Volume of the background sound, 0.0-1.0 (default: 0.15) |
 
 ## System Prompt
 
@@ -222,6 +228,23 @@ For example:
 - Route sales calls to specific account managers
 - Escalate to supervisors when needed
 
+## Advanced Turn-Taking Settings
+
+Fine-tune how the agent detects when a user has finished speaking and manages interruptions:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `turnEndpointDelay` | integer | Silence duration in ms before the agent responds (50-2000, default: 100) |
+| `minTurnDuration` | integer | Minimum speech duration in ms to count as a valid turn (0-2000, default: 50) |
+| `minInterruptionDuration` | integer | How long in ms the user must speak to interrupt the agent (0-2000, default: 100) |
+| `frameActivationThreshold` | number | VAD probability threshold for speech detection (0.0-1.0, default: 0.35) |
+| `postSpeechCooldown` | integer | Echo guard timeout in ms after agent stops speaking (0-5000, default: 400) |
+| `ultravadEotThreshold` | number | End-of-turn probability threshold (0.0-1.0, default: 0.1) |
+| `speculativeSilenceMs` | integer | How quickly in ms to start speculative inference on silence (0-5000, default: 150) |
+| `fallbackSilenceMs` | integer | Fallback timeout in ms if endpointing fails (0-10000, default: 3000) |
+
+These settings have sensible defaults and most agents won't need to change them. Adjust only if you need to fine-tune latency or turn-taking behavior.
+
 ## Call Duration Limits
 
 Set maximum call duration to manage costs and prevent excessive calls:
@@ -267,42 +290,11 @@ Calls automatically end when this limit is reached.
 - Explore [Tools](/docs/core-concepts/tools) to add capabilities to your agents
 - Read the [Calls documentation](/docs/core-concepts/calls) to start making calls
 
-- How to interpret call outcomes
-- What information to extract from conversations
-- How to categorize call results
-- What actions to recommend based on call content
-
-### Variable Extraction
-
-Define custom variables to extract from calls, such as:
-
-- `budget` (integer) - Extract the lead's budget range
-- `timeline` (string) - Extract when they plan to make a decision
-- `company_size` (integer) - Extract company size information
-- Custom variables specific to your business needs
-
-For each variable, you can provide:
-
-- **Type**: integer, string, boolean, etc.
-- **Extraction guidance**: Instructions for the LLM on how to identify and extract this information
-- **Validation rules**: Ensure extracted values meet your requirements
-
-Extracted variables can then be used in:
-
-- WhatsApp template selection
-- Callback scheduling logic
-- Lead scoring and prioritization
-- Integration with your CRM or other systems
-
-## Related Guides
-
-- **[Calls](/docs/core-concepts/calls)** - Learn about creating individual calls
-- **[Campaigns](/docs/core-concepts/campaigns)** - Learn about batch campaigns
-- **[Call Context](/docs/configuration/call-context)** - Provide additional context to assistants
-- **[Callbacks](/docs/configuration/callbacks)** - Configure automatic retry logic
-
 ## API Reference
 
-- **[Create Call](/docs/api-reference/calls/create_call_calls_post)** - Create calls with assistant configuration
-- **[Create Campaign](/docs/api-reference/campaigns/create_campaign_campaigns_post)** - Create campaigns with assistant groups
+- [Create Agent](/docs/api-reference/agents/createAgent)
+- [List Agents](/docs/api-reference/agents/listAgents)
+- [Get Agent](/docs/api-reference/agents/getAgent)
+- [Update Agent](/docs/api-reference/agents/updateAgent)
+- [Delete Agent](/docs/api-reference/agents/deleteAgent)
 
