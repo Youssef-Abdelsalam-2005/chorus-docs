@@ -18,7 +18,7 @@ On your PBX/SBC, configure a SIP trunk pointing to our SIP server for your regio
 
 ### Step 2: Allowlist our SIP sever's IPs
 
-Allowlist our SIP server's IP addresses on your PBX for outbound calls. This allows our SIP server to send SIP INVITEs to your PBX.
+Allowlist our SIP server's IP addresses on your PBX. This allows our SIP server to send SIP INVITEs to your PBX.
 
 ### Step 3: Add the Number in Chorus
 
@@ -30,7 +30,7 @@ In your Chorus dashboard, add the number with mode **IP Allowlist** and enter:
 
 The platform automatically creates a SIP trunk on our SIP server with your IP allowlisted and registers the number for inbound webhooks. No further configuration is needed.
 
-## Registration Mode
+## SIP Registration Mode
 
 Use registration mode when your PBX expects SIP clients to register with credentials (username/password).
 
