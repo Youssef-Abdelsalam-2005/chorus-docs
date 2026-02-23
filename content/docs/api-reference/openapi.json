@@ -1118,6 +1118,32 @@
             "additionalProperties": true,
             "nullable": true
           },
+          "parentCallId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "ID of the parent call if this is a transfer-related call (e.g., warm briefing)"
+          },
+          "transferType": {
+            "type": "string",
+            "enum": ["warm_briefing"],
+            "nullable": true,
+            "description": "Type of transfer call. Only set on child transfer calls."
+          },
+          "transferStatus": {
+            "type": "string",
+            "enum": ["initiated", "briefing", "bridged", "cancelled"],
+            "nullable": true,
+            "description": "Current status of the transfer. Only set on child transfer calls."
+          },
+          "transferCalls": {
+            "type": "array",
+            "nullable": true,
+            "description": "Child transfer calls (e.g., warm briefing calls). Only included in single-call detail responses (GET /calls/{id}), not in list responses.",
+            "items": {
+              "$ref": "#/components/schemas/TransferCall"
+            }
+          },
           "startedAt": {
             "type": "string",
             "format": "date-time",
@@ -1131,6 +1157,75 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "TransferCall": {
+        "type": "object",
+        "description": "A transfer-related call record (e.g., warm briefing call to a transfer target)",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transferType": {
+            "type": "string",
+            "enum": ["warm_briefing"],
+            "nullable": true
+          },
+          "transferStatus": {
+            "type": "string",
+            "enum": ["initiated", "briefing", "bridged", "cancelled"],
+            "nullable": true
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "nullable": true
+          },
+          "customerNumber": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transfer target's phone number"
+          },
+          "recordingUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Presigned URL for the briefing call recording"
+          },
+          "transcript": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {
+                  "type": "string",
+                  "enum": ["user", "assistant", "system"]
+                },
+                "content": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cost": {
+            "type": "number",
+            "nullable": true,
+            "description": "Cost of the briefing call in USD"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -1341,6 +1436,94 @@
           }
         }
       },
+      "TransferTarget": {
+        "type": "object",
+        "description": "A transfer target configured on an agent. Can be either an agent-to-agent transfer or a phone number transfer (cold or warm).",
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["type", "targetAgentId"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["agent"],
+                "description": "Agent-to-agent transfer (AI persona swap)"
+              },
+              "targetAgentId": {
+                "type": "string",
+                "format": "uuid",
+                "description": "ID of the target agent to transfer to"
+              },
+              "targetAgentName": {
+                "type": "string",
+                "description": "Name of the target agent (read-only, included in responses)"
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500,
+                "nullable": true,
+                "description": "Instructions for when the AI should use this transfer"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["type", "phoneNumber", "label", "transferMode"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["phone"],
+                "description": "Phone number transfer"
+              },
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Transfer target ID (read-only, included in responses)"
+              },
+              "phoneNumber": {
+                "type": "string",
+                "description": "Target phone number in E.164 format (e.g., +14155551234)"
+              },
+              "label": {
+                "type": "string",
+                "description": "Display name for this transfer target (e.g., 'Sales Team', 'Support')"
+              },
+              "transferMode": {
+                "type": "string",
+                "enum": ["cold", "warm"],
+                "description": "Transfer mode. 'cold' immediately redirects the caller. 'warm' puts the caller on hold, calls the target, lets the AI brief them, then bridges the calls."
+              },
+              "description": {
+                "type": "string",
+                "maxLength": 500,
+                "nullable": true,
+                "description": "Instructions for when the AI should use this transfer"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Creation timestamp (read-only)"
+              }
+            }
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type"
+        }
+      },
+      "SetTransferTargetsRequest": {
+        "type": "object",
+        "required": ["transferTargets"],
+        "properties": {
+          "transferTargets": {
+            "type": "array",
+            "description": "Complete list of transfer targets. This replaces all existing targets.",
+            "items": {
+              "$ref": "#/components/schemas/TransferTarget"
+            }
+          }
+        }
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -1525,6 +1708,13 @@
                                 "type": "string",
                                 "format": "uuid"
                               }
+                            },
+                            "transferTargets": {
+                              "type": "array",
+                              "description": "Transfer targets configured on this agent (agent-to-agent and phone transfers)",
+                              "items": {
+                                "$ref": "#/components/schemas/TransferTarget"
+                              }
                             }
                           }
                         }
@@ -1641,6 +1831,121 @@
                       "type": "boolean"
                     }
                   }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/agents/{id}/transfer-targets": {
+      "get": {
+        "summary": "List transfer targets",
+        "description": "Retrieve all transfer targets configured on an agent. Includes both agent-to-agent transfers and phone number transfers (cold/warm).",
+        "operationId": "listTransferTargets",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Agent ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TransferTarget"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agent not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Set transfer targets",
+        "description": "Replace all transfer targets on an agent. This is a full replacement — any existing targets not included in the request will be removed. Supports both agent-to-agent transfers (AI persona swap) and phone number transfers (cold or warm).",
+        "operationId": "setTransferTargets",
+        "tags": ["Agents"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Agent ID",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTransferTargetsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transfer targets updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -2972,7 +3277,7 @@
     },
     {
       "name": "Calls",
-      "description": "View call history and details"
+      "description": "View call history, details, and initiate outbound calls"
     },
     {
       "name": "Voices",
