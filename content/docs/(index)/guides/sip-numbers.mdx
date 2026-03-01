@@ -16,9 +16,15 @@ Use IP allowlisting when your PBX has a static IP address and you want a simple,
 
 On your PBX/SBC, configure a SIP trunk pointing to our SIP server for your region.
 
-### Step 2: Allowlist our SIP sever's IPs
+### Step 2: Allowlist our SIP server's IP
 
-Allowlist our SIP server's IP addresses on your PBX. This allows our SIP server to send SIP INVITEs to your PBX.
+Allowlist the following IP address on your PBX/SBC firewall to allow SIP traffic from our server:
+
+```
+3.77.143.208
+```
+
+This allows our SIP server to send SIP INVITEs to your PBX.
 
 ### Step 3: Add the Number in Chorus
 

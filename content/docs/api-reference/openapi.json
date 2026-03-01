@@ -225,6 +225,18 @@
             "default": 0.15,
             "description": "Volume of the background sound (0.0 to 1.0)"
           },
+          "holdMessage": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true,
+            "description": "Message the agent speaks to the caller when placing them on hold during a warm transfer"
+          },
+          "holdMusicUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true,
+            "description": "URL of hold music audio to play while the caller is on hold during a warm transfer"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -422,6 +434,18 @@
             "maximum": 1,
             "default": 0.15,
             "description": "Volume of the background sound (0.0 to 1.0)"
+          },
+          "holdMessage": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true,
+            "description": "Message the agent speaks to the caller when placing them on hold during a warm transfer"
+          },
+          "holdMusicUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true,
+            "description": "URL of hold music audio to play while the caller is on hold during a warm transfer"
           }
         }
       },
@@ -584,6 +608,16 @@
             "type": "number",
             "minimum": 0,
             "maximum": 1
+          },
+          "holdMessage": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "holdMusicUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "nullable": true
           }
         }
       },
@@ -705,6 +739,12 @@
             "default": "udp",
             "description": "SIP transport protocol. Used when sipMode is 'ip_allowlist'."
           },
+          "sipRegisterTransport": {
+            "type": "string",
+            "enum": ["udp", "tcp", "tls"],
+            "default": "udp",
+            "description": "SIP registration transport protocol. Used when sipMode is 'registration'."
+          },
           "metadata": {
             "type": "object",
             "additionalProperties": true
@@ -777,6 +817,11 @@
           "sipProtocol": {
             "type": "string",
             "enum": ["udp", "tcp", "tls"]
+          },
+          "sipRegisterTransport": {
+            "type": "string",
+            "enum": ["udp", "tcp", "tls"],
+            "description": "SIP registration transport protocol. Used when sipMode is 'registration'."
           },
           "metadata": {
             "type": "object",
