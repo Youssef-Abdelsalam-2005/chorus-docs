@@ -187,12 +187,14 @@
           "firstMessageUninterruptible": {
             "type": "boolean",
             "default": false,
-            "description": "Whether the agent's first message cannot be interrupted by the user"
+            "description": "Whether the agent's first message cannot be interrupted by the user (only applies when firstSpeaker is 'agent')"
           },
           "firstMessageDelay": {
-            "type": "number",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
             "default": 0,
-            "description": "Seconds to wait before the agent sends its first message"
+            "description": "Milliseconds to wait before the agent sends its first message (only applies when firstSpeaker is 'agent')"
           },
           "maxCallDurationSeconds": {
             "type": "integer",
@@ -397,12 +399,14 @@
           "firstMessageUninterruptible": {
             "type": "boolean",
             "default": false,
-            "description": "Whether the agent's first message cannot be interrupted by the user"
+            "description": "Whether the agent's first message cannot be interrupted by the user (only applies when firstSpeaker is 'agent')"
           },
           "firstMessageDelay": {
-            "type": "number",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
             "default": 0,
-            "description": "Seconds to wait before the agent sends its first message"
+            "description": "Milliseconds to wait before the agent sends its first message (only applies when firstSpeaker is 'agent')"
           },
           "maxCallDurationSeconds": {
             "type": "integer",
@@ -578,10 +582,14 @@
             "type": "boolean"
           },
           "firstMessageUninterruptible": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Whether the agent's first message cannot be interrupted by the user (only applies when firstSpeaker is 'agent')"
           },
           "firstMessageDelay": {
-            "type": "number"
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10000,
+            "description": "Milliseconds to wait before the agent sends its first message (only applies when firstSpeaker is 'agent')"
           },
           "maxCallDurationSeconds": {
             "type": "integer",
